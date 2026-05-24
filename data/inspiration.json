@@ -1,0 +1,46 @@
+{
+  "videos": [
+    {
+      "id": "2XAGmDxlnMM",
+      "title": "Another juicy minor 9 chord (drop-2 voicing)",
+      "creator": "PianoPig",
+      "type": "short",
+      "tags": ["voicings", "minor", "drop-2"]
+    },
+    {
+      "id": "h-1f6WZKZTM",
+      "title": "The ONLY chord you need to play jazz piano (3-5-7-9)",
+      "creator": "PianoPig",
+      "type": "long",
+      "tags": ["voicings", "shells", "bill-evans"]
+    },
+    {
+      "id": "8kdyfL2-8eo",
+      "title": "4 awesome minor chord voicings",
+      "creator": "PianoPig",
+      "type": "long",
+      "tags": ["voicings", "minor", "rootless"]
+    },
+    {
+      "id": "LH6cVLbxSBE",
+      "title": "How to remember chords & voicings forever",
+      "creator": "PianoPig",
+      "type": "long",
+      "tags": ["practice", "voicings", "memory"]
+    },
+    {
+      "id": "AZhk6BbIHiA",
+      "title": "This will transform your jazz piano voicings",
+      "creator": "PianoPig",
+      "type": "short",
+      "tags": ["voicings", "improv"]
+    },
+    {
+      "id": "N5ixm8iLMjI",
+      "title": "6 must-know jazz piano left-hand voicings",
+      "creator": "Michael Keithson",
+      "type": "long",
+      "tags": ["voicings", "left-hand", "comping"]
+    }
+  ]
+}

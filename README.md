@@ -1,85 +1,70 @@
-# chords — danielogbuigwe.com/chords
+# chords — jazz piano practice app
 
-A jazz piano practice room. Plug in a MIDI keyboard, pick a drill, the page recognizes what you play. Material distilled from Dr. JB Dyas (Thelonious Monk Institute) and Dan Davey (Mt. Hood Community College).
+A personal practice room for jazz piano. MIDI in, chord recognition, drills, a reference dictionary, lessons from books, and a curated inspiration feed. Lives at danielogbuigwe.com/chords.
 
-## What's in here
+## What it does
 
-**The brain (chord detection):** detects all five Dyas chord qualities (maj7, dom7, m7, ø, °7) plus triads, sus4, 6 chords, and minor-major7 — by **pitch-class set**, so inversions and octave doublings register correctly. Roman-numeral mapping relative to any key.
+**Play** *(home)* — Plug in a MIDI keyboard. The page recognizes what you play in real time. Drop the welcome card the moment a device connects so the keyboard owns the page. Roman numeral relative to C by default, switches when you're inside a key-aware drill.
 
-**The teacher (lesson library):**
-- Guide tones in C (Davey)
-- ii-V-I shells in C (3-7-9 voicings)
-- The five chord qualities (Dyas)
-- Minor ii-V-i in C minor (Dø → G7alt → Cm)
-- **ii-V-I around the cycle of fifths in all 12 keys** — 36 drills, alternating Category A and B voicings per Dyas's method
+**Reference** — Chord dictionary (25 qualities × 12 roots — about 300 chords), scale dictionary (20 scales × 12 keys), intervals reference, and an interactive circle of fifths. Click any cell, hear it, see it on a mini keyboard.
 
-**The body (UI):**
-- 49-key SVG piano keyboard (C2–C6)
-- Target notes shown as dusty-blue "hint" keys; played notes light up amber
-- Live chord detection with Roman numeral relative to the current lesson's tonic
-- Floating chord-name overlay above the keys you're holding
-- Tap-to-play fallback for mobile and Safari/Firefox (no Web MIDI there)
-- Modern evening theme: deep blue-black + warm brass + editorial typography
+**Drill** — Practice exercises with persistent stats. Currently:
+- Cycle ii–V–I in all 12 keys (36 chords, alternating Davey Cat A/B voicings)
+- Chord-quality flashcards (60 items, 5 qualities × 12 roots)
+- Diatonic 7ths in a random key (40 capped items)
+- Minor ii–V–i in all 12 keys
 
-**The deploy:** Cloudflare Pages via GitHub Actions. No build step.
+**Lessons** — Long-form material with interactive inline chord pills. Click any `Cmaj7` in the text to expand a mini keyboard underneath. Click a progression like `Dm7 → G7 → Cmaj7` to step through or play it back. Currently:
+- Circle of Fifths Progressions (Weissman-adapted)
+- Chord Inversions and Smooth Voice Leading (Weissman-adapted)
 
-## File structure
+More lessons land here as we photograph book pages and convert them — that workflow is for after this build.
+
+**Inspiration** — Curated YouTube embeds (PianoPig shorts + long-form jazz piano clips). Filter by tag.
+
+## Settings
+
+**Mute toggle** in the sidebar footer — turn off all in-app sounds if you want to play through your DAW only. Persists across sessions in localStorage.
+
+**Pluggable synth backend** — Default is a tiny Web Audio oscillator (~3 KB, always works, sounds clean). The framework supports swapping in a sample-based backend later by calling `Audio.registerBackend('my-samples', impl)`. The samples don't ship — the default oscillator does — keeping the app under 200 KB.
+
+## Tech
+
+Vanilla JS, no framework, no build step. Modules in dependency order:
 
 ```
-index.html              Layout: hero, lesson tabs, active lesson, piano, detection, library
-styles.css              Modern evening theme
-js/
-  theory.js             Music primitives. Chord detection by PC set. Roman numerals.
-  voicings.js           Voicing templates + cycle-of-5ths ii-V-I drill generator.
-                        All lessons defined here.
-  midi.js               Passive Web MIDI listener. Bitwise status-byte parsing.
-                        Note On/Off + CC64 sustain. Plus virtualNoteOn for tap mode.
-  keyboard.js           SVG keybed renderer. setActive, setHints, tap handlers.
-  lessons.js            Practice loop. Match held notes to target drill, advance on success.
-  app.js                Top-level wiring. Loaded last.
-.github/workflows/
-  deploy.yml            Cloudflare Pages deploy
-  deploy-s3.yml.disabled  S3 alternative, kept for reference
+js/theory.js        — Music primitives. ~25 chord qualities, 20 scales, intervals,
+                      chord detection by pitch-class set, Roman numerals,
+                      diatonic chord builder.
+js/midi.js          — Passive Web MIDI listener. sysex:false, bitwise status parsing.
+                      Sustain (CC#64). Coexists with DAWs.
+js/audio.js         — Pluggable synth. Default Web Audio oscillator with ADSR.
+                      Mute persisted to localStorage.
+js/keyboard.js      — SVG keybed component. Configurable range. Tap-to-play.
+js/drills.js        — Drill catalog + per-drill stats in localStorage.
+js/router.js        — Minimal hash router (#/play, #/reference/chords, etc).
+js/pages/*.js       — One module per app section (play, reference, drill,
+                      lessons, inspiration).
+js/app.js           — Top-level wiring. Sidebar, routes, MIDI status, mute toggle.
+
+data/inspiration.json   — Seed list of PianoPig + jazz piano video IDs.
+lessons-content/*.md    — Lesson source in Markdown with [[Chord]] pill syntax.
+                          Read by the lessons page at runtime via fetch().
 ```
 
-## You said you already connected the Cloudflare account via GitHub — here's what's left
+## Deploy
 
-You have two paths from here. Both work; pick one.
+You already wired GitHub → Cloudflare Pages in the last build. Same setup applies:
 
-### Path A: Use Cloudflare's built-in Pages CI (simplest)
+1. Replace files in your local clone with this rebuild
+2. `git add -A && git commit -m "Rebuild: sidebar app, reference, drill, lessons, inspiration" && git push`
+3. Cloudflare auto-deploys from the push
 
-Since you already linked GitHub to Cloudflare:
+The build is fully static. No build command, no output directory needed in the Cloudflare Pages config — leave them empty.
 
-1. Cloudflare dashboard → **Workers & Pages** → **Create** → **Pages** → **Connect to Git**
-2. Pick the repo (or create the repo first, then connect)
-3. Build settings:
-   - **Build command:** *leave blank*
-   - **Build output directory:** *leave blank* (or `/`)
-4. Save. Every push to main auto-deploys.
-5. **Delete `.github/workflows/deploy.yml`** — you don't need the Action since Cloudflare itself is building. Two CI systems racing is a mess.
+## Photographing book pages later
 
-This is what I recommend. It's one less thing to maintain.
-
-### Path B: Keep the GitHub Action
-
-Use this if you want the deploy logged in your repo's Actions tab:
-
-1. Cloudflare dashboard → **My Profile** (top right) → **API Tokens** → **Create Token** → use the **"Edit Cloudflare Workers"** template (works for Pages too)
-2. Get your Account ID from the dashboard sidebar
-3. In the GitHub repo → Settings → Secrets and variables → Actions → add:
-   - `CLOUDFLARE_API_TOKEN`
-   - `CLOUDFLARE_ACCOUNT_ID`
-4. Make sure the Pages project name (`chords` in `deploy.yml`) exists in Cloudflare. Create it once via dashboard with **Direct Upload** option, no Git connection.
-
-### Custom domain → `danielogbuigwe.com/chords`
-
-Three options, ranked by effort:
-
-1. **`chords.danielogbuigwe.com` (2 minutes)** — In the Pages project, Custom domains → Add. Cloudflare handles DNS automatically if the apex is on their nameservers.
-2. **Pull `/chords` into the main site repo** — if `danielogbuigwe.com` is also Cloudflare Pages, move these files into a `chords/` subfolder of that repo. The path just works.
-3. **Worker rewrite** — put a Cloudflare Worker on the apex that proxies `/chords/*` to the standalone Pages project. Most flexible, slightly more setup.
-
-If you don't have a strong opinion, go subdomain. Easiest to undo later.
+When we do the PDF/book extraction together, the target schema is the `lessons-content/*.md` format already in this repo. One Markdown file per lesson, YAML front-matter (title/source/topic), prose with `[[ChordName]]` and `[[chord1 → chord2 → chord3]]` inline syntax. The Lessons page registers each file's slug in the catalog list at the top of `js/pages/lessons.js`. To add a new lesson by hand: drop the .md file in `lessons-content/`, append a row to the `LESSONS` array in `js/pages/lessons.js`, push. No build step.
 
 ## Local dev
 
@@ -88,17 +73,10 @@ python3 -m http.server 8000
 # open http://localhost:8000
 ```
 
-Web MIDI requires HTTPS in production, but `localhost` works over plain HTTP.
+Web MIDI requires HTTPS in production. localhost works on plain HTTP.
 
-## What got added vs. last night
+## Browser support
 
-- Reads from two real handouts: Dyas (Monk Institute) and Davey (Mt. Hood). Lessons map directly to their pedagogy.
-- Detects every quality from the handouts — not just three hardcoded chords.
-- Practice loop: target chord → ghost hint notes on keyboard → user plays → auto-advance.
-- 12-key cycle drill (36 chords, alternating A/B voicings) — the centerpiece of Davey's method.
-- Mobile-first responsive layout with tap-to-play.
-- Modern evening theme.
+Web MIDI: Chrome, Edge, Opera. Firefox and Safari don't ship Web MIDI yet — those users get the visual keyboard with click-to-play (still works fine for browsing the Reference and Lessons sections).
 
-## What's next (handoff to overnight agents)
-
-See `CLAUDE.md` — that file has the constraints, the ranked next-task list, and the update protocol.
+The app runs offline once loaded — Cloudflare Pages caches everything. No backend, no accounts, no analytics.

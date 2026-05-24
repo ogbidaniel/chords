@@ -1,43 +1,49 @@
 # STATUS
 
-Newest at top. Format: `## YYYY-MM-DD HH:MM — agent` then bullets.
+Newest at top. Format: `## YYYY-MM-DD — agent` then bullets.
 
 ---
 
-## 2026-05-23 night — rebuild with PDF material (Claude)
+## 2026-05-24 — Full rebuild around sidebar + sections (Claude)
 
 **Shipped**
-- Full rewrite from last night's three-chord demo to a real learning app.
-- Modular architecture: `theory / voicings / midi / keyboard / lessons / app`.
-- Chord detection now covers 9 qualities (Dyas's five plus triads, sus4, m6, mMaj7).
-- 5 lessons defined, sourced to PDFs:
-  - Guide tones in C (Davey)
-  - ii-V-I shells in C with 3-7-9 voicings (Davey)
-  - The five chord qualities (Dyas)
-  - Minor ii-V-i in C minor (Dyas)
-  - **ii-V-I in all 12 keys** — 36-drill cycle with alternating Cat A/B voicings (Davey)
-- Practice loop: target chord highlighted as ghost on keyboard, user plays, page auto-advances on match.
-- Library section: 8 reference cards from the handouts (5 qualities, guide tones, voice leading, A/B voicings, ii-V-I major, ii-V-i minor, common forms, tune learning order).
-- Tap-to-play fallback on mobile / non-MIDI browsers.
-- Modern evening theme: deep blue-black, brass accent, Fraunces + JetBrains Mono.
-- Updated Cloudflare Pages workflow for new file structure.
+- New shell: persistent sidebar on desktop, drawer on mobile (≤860px). Hash router. Five sections.
+- `/play` — keyboard center-stage. Welcome card appears only when no MIDI device. Right-side Watch widget surfaces a random PianoPig clip. Chord-overlay clipping bug fixed (now in its own layer above the keyboard frame).
+- `/reference/chords` — 25 qualities × 12 roots, grouped by family (7ths, 6ths, triads, extended, altered). Click any cell → highlights mini keyboard, plays chord.
+- `/reference/scales` — 20 scales × 12 roots.
+- `/reference/intervals` — 13 intervals, ear-friendly click-to-hear.
+- `/reference/circle` — interactive SVG circle of fifths, major/minor toggle, click any key to see its diatonic 7ths.
+- `/drill` — catalog of 4 drills with persisted stats: cycle ii-V-I (36 chords), quality flashcards (60), diatonic 7ths (40), minor ii-V-i (36).
+- `/drill/:id` — active session, ghost-note hints on keyboard, streak counter, accuracy %, hear-target button, skip, reset stats.
+- `/lessons` — catalog + 2 Weissman-adapted lessons: "Circle of Fifths Progressions" and "Chord Inversions and Smooth Voice Leading".
+- `/lessons/:slug` — Markdown renderer with `[[Chord]]` and `[[Dm7 → G7 → Cmaj7]]` inline interactive pills. Click expands a mini-keyboard panel under the pill. Slash chords (`[[C/E]]`) supported.
+- `/inspiration` — 6 seeded videos (PianoPig + Michael Keithson), tag filter, embedded YouTube via `youtube.com/embed`.
+- Built-in synth: Web Audio oscillator (two voices, ADSR envelope) at ~3 KB. Mute toggle in sidebar footer, persisted to localStorage. Backend system supports `Audio.registerBackend()` for future Tone.js/sample backends.
+- Top-left brand says "chords" only (Ogbi's request — removed personal domain).
+- Visual: tool-first design, less editorial. Fraunces used sparingly for chord names and section titles, Inter Tight for body, JetBrains Mono for UI labels.
 
 **Decisions made without you**
-- Treated the original spec's `[57, 60, 64, 65]` as the Davey shell voicing F-C-E + A (root D), not as the chord itself. This is what Davey actually teaches as the Dm7 shell. If you wanted A-C-E-F as a literal chord, the system will still match it — it's just one of many voicings of Dm7 by PC-set.
-- Picked Cloudflare Pages **without** the GitHub Action as the default recommended path in README, since you connected GitHub→Cloudflare directly. The Action is provided as the alternative.
-- Chose Fraunces (serif) + JetBrains Mono pairing. Editorial, not generic.
+- Wrote two Weissman-adapted lessons instead of one, since "Circle of Fifths Progressions" alone made the lessons catalog look thin. "Inversions and Voice Leading" pulled from his coverage of inversions + voice-leading + half-step motion. Both translate cleanly to web; both cite the source.
+- Capped diatonic-7ths drill at 40 randomized items per session rather than full 84 (12 keys × 7 degrees) — felt long otherwise. Easy to raise if you disagree; see `js/drills.js`.
+- Used cycle-of-fourths order (counterclockwise: C → F → Bb → ...) for the drill, since that's how Davey's chart progresses. Both directions are correct — fourths is the jazz convention.
+- Lesson Markdown lives in `lessons-content/`, fetched at runtime. Cloudflare Pages serves it as static. No backend needed.
+- PianoPig video IDs verified via web search before seeding `data/inspiration.json` — all 6 videos are real and embeddable.
 
 **To verify in AM**
-- [ ] Plug in MIDI keyboard, hit C-E-G-B → "Cmaj7" appears with overlay
-- [ ] Start "ii-V-I in all 12 keys" lesson → ghost notes appear in pale blue → play them → auto-advance after ~1s
-- [ ] Tap keys on the SVG with mouse → fallback play works
-- [ ] Layout holds together at 380px width
-- [ ] Sustain pedal pill lights up when pedal pressed; chord persists; releases on lift
+- [ ] `/play` shows welcome card when no MIDI, hides it when device connects
+- [ ] Chord overlay no longer clips into the keyboard frame border (visible bug from previous build)
+- [ ] Sidebar collapses to drawer below ~860px viewport; hamburger button toggles it
+- [ ] Mute toggle silences the synth + persists across page reload
+- [ ] `/reference/chords` — click Cmaj7 → mini keyboard highlights, hear chord
+- [ ] `/drill/cycle-ii-v-i` — start drill → ghost notes appear, play them → advances
+- [ ] `/lessons/circle-of-fifths-progressions` → click `[[Dm7 → G7 → Cmaj7]]` → mini panel opens, all 3 steps playable
+- [ ] `/inspiration` → 6 videos load; tag filter narrows list
 
-**Known limitations**
-- Falling-notes improv mode not built yet — top of next-task list.
-- No audio playback (silent UI; relies on your hardware).
-- Overlay hides on window resize until next MIDI event (logged in CLAUDE.md task #8).
+**Known limitations / not done**
+- Falling-notes improv mode — top of next-task list (CLAUDE.md task 1).
+- No sample-based piano sounds yet — framework in place, oscillator is default.
+- Book/PDF extraction workflow — explicitly deferred per Ogbi's request. Lessons hand-written for now.
+- No drill leaderboards or cross-session graphs — stats are per-drill cumulative only.
 
 **Blockers**
 - None.
