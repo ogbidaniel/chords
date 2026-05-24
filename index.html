@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#0c1018" />
+<title>Chords — A jazz piano practice room</title>
+<meta name="description" content="MIDI-driven jazz piano practice. Guide tones, shells, ii-V-I in all 12 keys. From Monk Institute and Mt. Hood materials." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+
+<div class="bg-gradient"></div>
+<div class="bg-grain"></div>
+
+<header class="site-header">
+  <div class="brand">
+    <span class="brand-mark">▲</span>
+    <span class="brand-text mono">danielogbuigwe.com</span>
+    <span class="brand-divider">/</span>
+    <span class="brand-current">chords</span>
+  </div>
+  <div class="header-status">
+    <span class="status-pill mono"><span id="midi-dot" class="dot"></span><span id="midi-status">Connecting…</span></span>
+    <span class="status-pill mono" id="sustain-pill"><span class="pedal-icon">⌐</span>&nbsp;Sustain</span>
+  </div>
+</header>
+
+<main class="layout">
+
+  <!-- HERO -->
+  <section class="hero">
+    <p class="eyebrow mono">A room for jazz piano practice</p>
+    <h1 class="display">Hear the <em>shape</em> of every chord<br><span class="hero-accent">before you reach for it.</span></h1>
+    <p class="lede">Plug in a MIDI keyboard. Pick a drill. The page listens, recognizes what you play, and walks you through the same material the Monk Institute and Mt. Hood Community College teach.</p>
+  </section>
+
+  <!-- LESSON TABS -->
+  <section class="lessons-strip" aria-label="Lessons">
+    <div class="lessons-strip-inner" id="lesson-tabs">
+      <!-- populated by JS -->
+    </div>
+  </section>
+
+  <!-- ACTIVE LESSON PANEL -->
+  <section id="active-lesson-panel" class="active-lesson" hidden>
+    <div class="active-lesson-head">
+      <div>
+        <p class="eyebrow mono" id="lesson-source">—</p>
+        <h2 class="display" id="lesson-title">—</h2>
+        <p class="lesson-summary" id="lesson-summary">—</p>
+      </div>
+      <button class="ghost-btn mono" id="close-lesson">Close lesson</button>
+    </div>
+
+    <div class="drill-card">
+      <div class="drill-meta">
+        <span class="mono eyebrow">Drill <span id="drill-index">1</span> of <span id="drill-total">1</span></span>
+        <span class="mono eyebrow">Streak: <span id="streak-count">0</span></span>
+      </div>
+      <p class="drill-target display" id="drill-target">Pick a lesson to begin.</p>
+      <p class="drill-notes mono" id="drill-notes">—</p>
+      <div class="drill-controls">
+        <button class="ghost-btn mono" id="prev-drill">← Prev</button>
+        <button class="ghost-btn mono" id="next-drill">Next →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- PIANO -->
+  <section class="piano-section" id="piano-stage">
+    <div class="overlay-layer" id="overlay-layer"></div>
+    <div class="piano-frame">
+      <div class="piano-frame-rail piano-frame-rail-top"></div>
+      <div id="piano-container"></div>
+      <div class="piano-frame-rail piano-frame-rail-bottom"></div>
+    </div>
+    <p class="piano-caption mono">
+      C2 → C6 · MIDI 36–84 · passive listener · tap keys on mobile if you don't have a MIDI device
+    </p>
+  </section>
+
+  <!-- DETECTION PANEL -->
+  <section class="detection-row">
+    <div class="detect-card">
+      <p class="eyebrow mono">Now sounding</p>
+      <p class="mono notes-line" id="active-notes">—</p>
+    </div>
+    <div class="detect-card detect-card-hero">
+      <p class="eyebrow mono">Detected</p>
+      <p class="display detected-name" id="detected-chord">—</p>
+      <p class="mono detected-roman" id="detected-roman"></p>
+    </div>
+    <div class="detect-card">
+      <p class="eyebrow mono">Pitch classes</p>
+      <p class="mono notes-line" id="active-pcs">—</p>
+    </div>
+  </section>
+
+  <!-- LIBRARY -->
+  <section class="library">
+    <h2 class="display section-title">The library</h2>
+    <p class="section-lede">Reference cards distilled from the handouts. Tap one to send to the practice panel.</p>
+
+    <div class="library-grid">
+      <div class="lib-card">
+        <p class="lib-card-eyebrow mono">5 chord qualities</p>
+        <ul class="lib-list">
+          <li><span class="qsym">Δ</span> Major 7  <span class="mono">1 3 5 7</span></li>
+          <li><span class="qsym">7</span> Dominant 7  <span class="mono">1 3 5 b7</span></li>
+          <li><span class="qsym">-</span> Minor 7  <span class="mono">1 b3 5 b7</span></li>
+          <li><span class="qsym">ø</span> Half-diminished  <span class="mono">1 b3 b5 b7</span></li>
+          <li><span class="qsym">°</span> Diminished 7  <span class="mono">1 b3 b5 6</span></li>
+        </ul>
+        <p class="lib-cite mono">Dyas · Monk Institute</p>
+      </div>
+
+      <div class="lib-card">
+        <p class="lib-card-eyebrow mono">Guide tones</p>
+        <p class="lib-prose">The 3rd and 7th carry the chord's identity. Two notes tell you everything: major vs. minor (3rd), maj7 vs. dom7 (7th). Add the 9th on top and you've got a working comping voicing.</p>
+        <p class="lib-cite mono">Davey · Mt. Hood</p>
+      </div>
+
+      <div class="lib-card">
+        <p class="lib-card-eyebrow mono">Voice leading</p>
+        <p class="lib-prose">In a ii-V-I: the 7th drops a half-step to become the 3rd of the next chord. The 3rd stays put to become the 7th. Two voices barely move.</p>
+        <p class="lib-cite mono">Dyas · Monk Institute</p>
+      </div>
+
+      <div class="lib-card">
+        <p class="lib-card-eyebrow mono">Category A &amp; B</p>
+        <p class="lib-prose">Two one-handed voicing shapes. <strong>A</strong>: 3rd on bottom (3-7-9 for maj/dom, b3-b7-9 for minor). <strong>B</strong>: 7th on bottom (7-3-5 for maj, b7-3-6 for dom, b7-b3-5 for minor). Alternate them through a progression for smooth voice leading.</p>
+        <p class="lib-cite mono">Dyas · Monk Institute</p>
+      </div>
+
+      <div class="lib-card">
+        <p class="lib-card-eyebrow mono">ii-V-I in major</p>
+        <p class="lib-prose"><strong>Dm7 → G7 → Cmaj7</strong>. The most common progression in jazz. Practiced around the cycle of fifths in all 12 keys.</p>
+        <p class="lib-cite mono">Both handouts</p>
+      </div>
+
+      <div class="lib-card">
+        <p class="lib-card-eyebrow mono">ii-V-i in minor</p>
+        <p class="lib-prose"><strong>Dø → G7alt → Cm</strong>. The half-diminished ii is the gateway to minor tonality. The 7alt brings the b9, #9, #5 to set up the resolution.</p>
+        <p class="lib-cite mono">Dyas · Monk Institute</p>
+      </div>
+
+      <div class="lib-card">
+        <p class="lib-card-eyebrow mono">Common forms</p>
+        <ul class="lib-list lib-list-tight">
+          <li><span class="mono">AABA</span> Take the A Train</li>
+          <li><span class="mono">ABAC</span> On Green Dolphin Street</li>
+          <li><span class="mono">16-bar</span> Blue Bossa</li>
+          <li><span class="mono">12-bar</span> Billie's Bounce</li>
+          <li><span class="mono">AAB</span> Song for My Father</li>
+        </ul>
+        <p class="lib-cite mono">Dyas · Monk Institute</p>
+      </div>
+
+      <div class="lib-card">
+        <p class="lib-card-eyebrow mono">Tune learning order</p>
+        <ol class="lib-list lib-list-numbered">
+          <li>Listen to the definitive recording</li>
+          <li>Memorize the form</li>
+          <li>Memorize root movement</li>
+          <li>Memorize chord qualities, arpeggiate</li>
+          <li>Play related scales in eighths</li>
+          <li>Memorize the head</li>
+          <li>Improvise with play-along</li>
+          <li>Transcribe phrases</li>
+          <li>Improvise incorporating transcribed phrases</li>
+        </ol>
+        <p class="lib-cite mono">Dyas · Monk Institute</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <p class="mono">Built for practice. Source material from Dr. JB Dyas (Thelonious Monk Institute of Jazz) and Dan Davey (Mt. Hood Community College). Web MIDI requires Chrome, Edge, or Opera.</p>
+    <p class="mono">Roadmap → falling-notes improv mode · play-along loops · transposition drills · transcribed phrases library</p>
+  </footer>
+</main>
+
+<!-- Scripts: theory → voicings → midi → keyboard → lessons → app glue -->
+<script src="./js/theory.js"></script>
+<script src="./js/voicings.js"></script>
+<script src="./js/midi.js"></script>
+<script src="./js/keyboard.js"></script>
+<script src="./js/lessons.js"></script>
+<script src="./js/app.js"></script>
+
+</body>
+</html>
