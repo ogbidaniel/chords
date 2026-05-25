@@ -1,13 +1,11 @@
-// router.js — minimal hash router. No framework, no dependencies.
-// Routes look like #/play, #/reference/chords, #/drill/quality-flashcards.
+// router.js — minimal hash router. No framework.
 
 const Router = (() => {
-  const routes = []; // [{ pattern: '/reference/:type', render: (params, el) => void }]
+  const routes = [];
   const listeners = new Set();
   let currentPath = null;
 
   function register(pattern, render) {
-    // Convert ":param" → capture group; "*" → catch-all
     const keys = [];
     const regexStr = pattern
       .replace(/:([a-zA-Z]+)/g, (m, k) => { keys.push(k); return '([^/]+)'; })
@@ -29,12 +27,8 @@ const Router = (() => {
 
   function go(path) {
     if (!path.startsWith('/')) path = '/' + path;
-    if (location.hash === '#' + path) {
-      // Same path — re-render
-      handleChange();
-    } else {
-      location.hash = '#' + path;
-    }
+    if (location.hash === '#' + path) handleChange();
+    else location.hash = '#' + path;
   }
 
   function handleChange() {
@@ -43,7 +37,6 @@ const Router = (() => {
     const main = document.getElementById('main-pane');
     const matched = match(path) || match('/');
     if (matched) {
-      // Scroll top on route change (mobile-friendly)
       if (currentPath !== path) {
         window.scrollTo({ top: 0, behavior: 'instant' });
         currentPath = path;
@@ -54,14 +47,12 @@ const Router = (() => {
   }
 
   function onChange(fn) { listeners.add(fn); }
-  function currentPathOf() { return currentPath; }
-
   function start() {
     window.addEventListener('hashchange', handleChange);
     handleChange();
   }
 
-  return { register, go, start, onChange, currentPathOf };
+  return { register, go, start, onChange };
 })();
 
 if (typeof window !== 'undefined') window.Router = Router;

@@ -1,70 +1,67 @@
 # chords — jazz piano practice app
 
-A personal practice room for jazz piano. MIDI in, chord recognition, drills, a reference dictionary, lessons from books, and a curated inspiration feed. Lives at danielogbuigwe.com/chords.
+A focused practice tool for jazz piano. Built around PianoPig's six-step curriculum and Weissman's chord-progression catalog. Lives at danielogbuigwe.com/chords.
 
-## What it does
+## The four sections
 
-**Play** *(home)* — Plug in a MIDI keyboard. The page recognizes what you play in real time. Drop the welcome card the moment a device connects so the keyboard owns the page. Roman numeral relative to C by default, switches when you're inside a key-aware drill.
+**Play** *(home)* — Plug in MIDI. The page recognizes what you play in real time. Chord name displayed in serif above a sheet-music grand staff that syncs note-for-note with the keyboard.
 
-**Reference** — Chord dictionary (25 qualities × 12 roots — about 300 chords), scale dictionary (20 scales × 12 keys), intervals reference, and an interactive circle of fifths. Click any cell, hear it, see it on a mini keyboard.
+**Practice** — Two sub-modes:
+- *Progressions* — Catalog of named progressions (ii-V-I, Autumn Leaves, All The Things You Are, etc.). Pick one, set the key, walk it. Strict mode advances when you play the chord; loose mode lets you explore freely.
+- *Three Chords* — PianoPig's foundation drill. maj7, dom7, m7 in the current key. Cycle through all 12 keys with the auto-cycle toggle.
 
-**Drill** — Practice exercises with persistent stats. Currently:
-- Cycle ii–V–I in all 12 keys (36 chords, alternating Davey Cat A/B voicings)
-- Chord-quality flashcards (60 items, 5 qualities × 12 roots)
-- Diatonic 7ths in a random key (40 capped items)
-- Minor ii–V–i in all 12 keys
+Both modes have a metronome (default 70 BPM, soft brush sample), Strict/Loose toggle, key selector, and auto-cycle through the cycle of fourths or fifths.
 
-**Lessons** — Long-form material with interactive inline chord pills. Click any `Cmaj7` in the text to expand a mini keyboard underneath. Click a progression like `Dm7 → G7 → Cmaj7` to step through or play it back. Currently:
-- Circle of Fifths Progressions (Weissman-adapted)
-- Chord Inversions and Smooth Voice Leading (Weissman-adapted)
+**Book** — Placeholder for Dick Weissman's *Basic Chord Progressions*. Empty until pages are photographed and extracted.
 
-More lessons land here as we photograph book pages and convert them — that workflow is for after this build.
-
-**Inspiration** — Curated YouTube embeds (PianoPig shorts + long-form jazz piano clips). Filter by tag.
+**Inspiration** — Curated PianoPig + jazz piano YouTube clips.
 
 ## Settings
 
-**Mute toggle** in the sidebar footer — turn off all in-app sounds if you want to play through your DAW only. Persists across sessions in localStorage.
+- **No audio output** — the app makes no sound. Play through your DAW (Ableton, Logic, FL Studio) or hardware piano. Decision: avoid the bad built-in synth; let the user's setup produce the sound.
+- **Metronome only audio** — soft brush sample, synthesized via Web Audio noise burst + bandpass filter. ~no kb cost.
+- **Stats tracking** — deferred. Will track per-chord practice counts and mistake counts in Strict mode, stored in localStorage.
 
-**Pluggable synth backend** — Default is a tiny Web Audio oscillator (~3 KB, always works, sounds clean). The framework supports swapping in a sample-based backend later by calling `Audio.registerBackend('my-samples', impl)`. The samples don't ship — the default oscillator does — keeping the app under 200 KB.
+## Recognition
+
+The detector returns a structured fact:
+```
+{
+  root, type, bass, extensions, foreign, confidence, chordTones, isSkeleton
+}
+```
+
+Not a string. The UI renders it. Same Cmaj7 voiced six different ways is still Cmaj7. The 3+7 rootless voicing (PianoPig's foundation) is detected with `isSkeleton: true`. Extensions like 9, b9, #11 are detected and labeled. Out-of-scale notes are marked `foreign` and flash red in Strict practice.
 
 ## Tech
 
-Vanilla JS, no framework, no build step. Modules in dependency order:
+Vanilla JS, no framework, no build step. Modules:
 
-```
-js/theory.js        — Music primitives. ~25 chord qualities, 20 scales, intervals,
-                      chord detection by pitch-class set, Roman numerals,
-                      diatonic chord builder.
-js/midi.js          — Passive Web MIDI listener. sysex:false, bitwise status parsing.
-                      Sustain (CC#64). Coexists with DAWs.
-js/audio.js         — Pluggable synth. Default Web Audio oscillator with ADSR.
-                      Mute persisted to localStorage.
-js/keyboard.js      — SVG keybed component. Configurable range. Tap-to-play.
-js/drills.js        — Drill catalog + per-drill stats in localStorage.
-js/router.js        — Minimal hash router (#/play, #/reference/chords, etc).
-js/pages/*.js       — One module per app section (play, reference, drill,
-                      lessons, inspiration).
-js/app.js           — Top-level wiring. Sidebar, routes, MIDI status, mute toggle.
-
-data/inspiration.json   — Seed list of PianoPig + jazz piano video IDs.
-lessons-content/*.md    — Lesson source in Markdown with [[Chord]] pill syntax.
-                          Read by the lessons page at runtime via fetch().
-```
+- `js/theory.js` — chord types, structured detection, Roman numeral parser, progression realizer
+- `js/midi.js` — passive Web MIDI listener
+- `js/keyboard.js` — SVG keybed, multi-state highlighting (playing/correct/wrong)
+- `js/staff.js` — simplified SVG grand staff with whole notes
+- `js/metronome.js` — soft brush metronome (Web Audio noise + filter)
+- `js/router.js` — hash router
+- `js/pages/*.js` — one file per section
+- `js/app.js` — top-level wiring
+- `data/progressions.json` — progression catalog
+- `data/inspiration.json` — YouTube clip seed
+- `data/weissman-book.json` — empty until photographs
 
 ## Deploy
 
-You already wired GitHub → Cloudflare Pages in the last build. Same setup applies:
+Already wired to Cloudflare Workers via GitHub. Push to main = deploy.
 
-1. Replace files in your local clone with this rebuild
-2. `git add -A && git commit -m "Rebuild: sidebar app, reference, drill, lessons, inspiration" && git push`
-3. Cloudflare auto-deploys from the push
-
-The build is fully static. No build command, no output directory needed in the Cloudflare Pages config — leave them empty.
-
-## Photographing book pages later
-
-When we do the PDF/book extraction together, the target schema is the `lessons-content/*.md` format already in this repo. One Markdown file per lesson, YAML front-matter (title/source/topic), prose with `[[ChordName]]` and `[[chord1 → chord2 → chord3]]` inline syntax. The Lessons page registers each file's slug in the catalog list at the top of `js/pages/lessons.js`. To add a new lesson by hand: drop the .md file in `lessons-content/`, append a row to the `LESSONS` array in `js/pages/lessons.js`, push. No build step.
+```bash
+cd ~/Development/chords
+# Replace contents with new build
+rm -rf js/ data/ index.html styles.css README.md CLAUDE.md STATUS.md
+tar -xzf ~/Downloads/chords-app.tar.gz -C .
+git add -A
+git commit -m "Rebuild: refocused practice loop"
+git push
+```
 
 ## Local dev
 
@@ -73,10 +70,25 @@ python3 -m http.server 8000
 # open http://localhost:8000
 ```
 
-Web MIDI requires HTTPS in production. localhost works on plain HTTP.
+Web MIDI requires HTTPS in production; localhost is exempted.
 
-## Browser support
+## Photograph workflow (future, deferred)
 
-Web MIDI: Chrome, Edge, Opera. Firefox and Safari don't ship Web MIDI yet — those users get the visual keyboard with click-to-play (still works fine for browsing the Reference and Lessons sections).
+When you photograph Weissman's book pages, an extraction script will run locally:
+1. Each photo → one Claude API call
+2. Output structured JSON matching the schema in `data/weissman-book.json`
+3. Commit the JSON, push, the Book section fills out
 
-The app runs offline once loaded — Cloudflare Pages caches everything. No backend, no accounts, no analytics.
+The Book page already reads from that file and renders pages — it just shows "not yet photographed" when the file is empty.
+
+## What's NOT in this build (deferred placeholders)
+
+These are intentional pauses, not bugs. Each will be revisited later:
+
+- **Audio synth** — no in-app sound output. Use your DAW.
+- **Sampled grand piano** — deferred; would require sample loading + pitch adjustment math.
+- **Cloudflare KV / cross-device sync** — deferred; localStorage suffices for one user.
+- **Stats tracking** — practice/mistake counts per chord. Schema designed; UI not built yet.
+- **VexFlow engraver-quality notation** — using simplified SVG staff for now.
+- **Photograph extraction script** — deferred until you start photographing.
+- **Strict mode error tracking storage** — counts wrong-note presses per chord in localStorage.

@@ -3,26 +3,26 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<meta name="theme-color" content="#0c1018" />
+<meta name="theme-color" content="#0a0a0f" />
 <title>chords — jazz piano practice</title>
-<meta name="description" content="MIDI-driven jazz piano practice. Chord reference, drills, lessons, and a curated jazz inspiration feed." />
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=JetBrains+Mono:wght@400;500;600&family=Inter+Tight:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter+Tight:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
 
-<!-- Background ambient layers -->
-<div class="bg-gradient"></div>
+<!-- Atmospheric drift layers -->
+<div class="bg-base"></div>
+<div class="bg-drift bg-drift-a"></div>
+<div class="bg-drift bg-drift-b"></div>
 <div class="bg-grain"></div>
 
 <!-- Mobile drawer scrim -->
 <div id="sidebar-scrim" class="sidebar-scrim"></div>
 
-<!-- Sidebar (always in DOM; CSS controls layout) -->
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-head">
     <a class="brand" href="#/play">
@@ -32,18 +32,10 @@
   </div>
   <nav class="side-nav" id="side-nav"></nav>
   <div class="sidebar-foot">
-    <button class="mute-toggle mono" id="mute-toggle" title="Toggle app sounds">
-      <span class="mute-icon"></span>
-      <span class="mute-label">Sound: on</span>
-    </button>
-    <p class="sidebar-fineprint mono">
-      Web MIDI: Chrome · Edge · Opera<br>
-      Tap keys if no device
-    </p>
+    <p class="sidebar-fineprint mono">Web MIDI: Chrome · Edge · Opera<br>Tap keys if no device<br>No audio output — use your DAW</p>
   </div>
 </aside>
 
-<!-- Top header (mobile shows drawer toggle; desktop shows MIDI pill) -->
 <header class="top-header">
   <button class="drawer-toggle" id="drawer-toggle" aria-label="Menu">
     <span></span><span></span><span></span>
@@ -57,25 +49,19 @@
   </div>
 </header>
 
-<!-- Main content pane -->
 <main id="main-pane" class="main-pane"></main>
 
 <!-- Scripts in dependency order -->
 <script src="./js/theory.js"></script>
 <script src="./js/midi.js"></script>
-<script src="./js/audio.js"></script>
 <script src="./js/keyboard.js"></script>
-<script src="./js/drills.js"></script>
+<script src="./js/staff.js"></script>
+<script src="./js/metronome.js"></script>
 <script src="./js/router.js"></script>
-
-<!-- Pages -->
 <script src="./js/pages/play.js"></script>
-<script src="./js/pages/reference.js"></script>
-<script src="./js/pages/drill.js"></script>
-<script src="./js/pages/lessons.js"></script>
+<script src="./js/pages/practice.js"></script>
+<script src="./js/pages/book.js"></script>
 <script src="./js/pages/inspiration.js"></script>
-
-<!-- App glue (loads last) -->
 <script src="./js/app.js"></script>
 
 </body>

@@ -10,9 +10,7 @@ const PageInspiration = (() => {
       const res = await fetch('./data/inspiration.json');
       const data = await res.json();
       videos = data.videos || [];
-    } catch (e) {
-      videos = [];
-    }
+    } catch (e) { videos = []; }
   }
 
   function allTags() {
@@ -21,19 +19,19 @@ const PageInspiration = (() => {
     return [...s].sort();
   }
 
-  async function render(params, main) {
-    main.innerHTML = `<div class="inspiration-page"><p class="cell-eyebrow mono">Loading…</p></div>`;
+  async function render(params, mainEl) {
+    mainEl.innerHTML = `<div class="inspiration-room"><p class="cell-eyebrow mono">Loading…</p></div>`;
     await load();
-    paint(main);
+    paint(mainEl);
   }
 
-  function paint(main) {
+  function paint(mainEl) {
     const filtered = activeTag ? videos.filter(v => v.tags && v.tags.includes(activeTag)) : videos;
-    main.innerHTML = `
-      <div class="inspiration-page">
-        <header class="ref-header">
+    mainEl.innerHTML = `
+      <div class="inspiration-room">
+        <header class="page-header">
           <h1 class="display">Inspiration</h1>
-          <p class="ref-lede">A curated feed of jazz piano clips. Watch, then go play.</p>
+          <p class="page-lede">A curated feed of jazz piano clips. Watch, then go play.</p>
         </header>
         <div class="tag-filters mono">
           <button class="tag-pill ${activeTag === null ? 'active' : ''}" data-tag="">All</button>
@@ -61,10 +59,10 @@ const PageInspiration = (() => {
         </div>
       </div>
     `;
-    main.querySelectorAll('.tag-pill').forEach(b => {
+    mainEl.querySelectorAll('.tag-pill').forEach(b => {
       b.addEventListener('click', () => {
         activeTag = b.dataset.tag || null;
-        paint(main);
+        paint(mainEl);
       });
     });
   }

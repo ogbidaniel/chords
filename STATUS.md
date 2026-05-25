@@ -1,49 +1,59 @@
 # STATUS
 
-Newest at top. Format: `## YYYY-MM-DD — agent` then bullets.
+Newest at top.
 
 ---
 
-## 2026-05-24 — Full rebuild around sidebar + sections (Claude)
+## 2026-05-25 — Refocus rebuild around PianoPig's six-step curriculum (Claude)
 
 **Shipped**
-- New shell: persistent sidebar on desktop, drawer on mobile (≤860px). Hash router. Five sections.
-- `/play` — keyboard center-stage. Welcome card appears only when no MIDI device. Right-side Watch widget surfaces a random PianoPig clip. Chord-overlay clipping bug fixed (now in its own layer above the keyboard frame).
-- `/reference/chords` — 25 qualities × 12 roots, grouped by family (7ths, 6ths, triads, extended, altered). Click any cell → highlights mini keyboard, plays chord.
-- `/reference/scales` — 20 scales × 12 roots.
-- `/reference/intervals` — 13 intervals, ear-friendly click-to-hear.
-- `/reference/circle` — interactive SVG circle of fifths, major/minor toggle, click any key to see its diatonic 7ths.
-- `/drill` — catalog of 4 drills with persisted stats: cycle ii-V-I (36 chords), quality flashcards (60), diatonic 7ths (40), minor ii-V-i (36).
-- `/drill/:id` — active session, ghost-note hints on keyboard, streak counter, accuracy %, hear-target button, skip, reset stats.
-- `/lessons` — catalog + 2 Weissman-adapted lessons: "Circle of Fifths Progressions" and "Chord Inversions and Smooth Voice Leading".
-- `/lessons/:slug` — Markdown renderer with `[[Chord]]` and `[[Dm7 → G7 → Cmaj7]]` inline interactive pills. Click expands a mini-keyboard panel under the pill. Slash chords (`[[C/E]]`) supported.
-- `/inspiration` — 6 seeded videos (PianoPig + Michael Keithson), tag filter, embedded YouTube via `youtube.com/embed`.
-- Built-in synth: Web Audio oscillator (two voices, ADSR envelope) at ~3 KB. Mute toggle in sidebar footer, persisted to localStorage. Backend system supports `Audio.registerBackend()` for future Tone.js/sample backends.
-- Top-left brand says "chords" only (Ogbi's request — removed personal domain).
-- Visual: tool-first design, less editorial. Fraunces used sparingly for chord names and section titles, Inter Tight for body, JetBrains Mono for UI labels.
+- Stripped to 4 sections: Play, Practice, Book, Inspiration.
+- **Play**: keyboard center stage, floating no-border layout. Sheet music staff above the keyboard with sync highlighting. Chord name in Cormorant Garamond, large, with quality-mapped atmospheric drift behind.
+- **Practice** with two sub-modes:
+  - *Progressions* — catalog of 12 progressions (ii-V-I, I V⁷, I IV, I IV V⁷, I V⁷ IV, I vi IV V, I vi ii V, minor ii-V-i, Autumn Leaves, All The Things You Are A1, Blue Bossa, Rhythm Changes A). Sourced from PianoPig + Weissman contents page.
+  - *Three Chords* — drill maj7, dom7, m7 in the current key. Auto-cycle through 12 keys toggle.
+- **Strict/Loose toggle** in the modebar. Loose = free exploration, no errors, all chords equally lit. Strict = one chord targeted at a time, foreign notes flash red, advances when required chord tones played + no foreign notes.
+- **Key selector** — 12 pills in cycle-of-fourths visual order. Click to set.
+- **Auto-cycle** — toggle that advances tonic to next key after completing the progression. Direction selectable (fourths or fifths).
+- **Metronome** — DAW-style BPM control. Click number to type, scroll to nudge, +/- buttons. Default 70 BPM. Soft brush sample (synthesized: bandpass-filtered white noise burst). Beat 1 of every 4 slightly louder.
+- **Book** page — placeholder, reads from empty `data/weissman-book.json`. Shows "not yet photographed" message; data structure ready for population.
+- **Inspiration** — 6 PianoPig + jazz piano clips, tag filter.
+- **Atmospheric background** — quality-mapped drifts (major=amber/gold, dominant=orange, minor=blue/violet, half-dim=greyish-blue, dim=monochrome). CSS-only, two layered radial gradients with slow drift animation. Frosted-glass surfaces over UI elements.
+- **Recognition** rewritten as structured detection. Returns `{root, type, bass, extensions, foreign, confidence, chordTones, isSkeleton}`. Detects:
+  - All 8 chord types: maj7, 7, m7, m7b5, dim7, maj, m, dim
+  - Rootless 3+7 skeletons (PianoPig's foundation voicing)
+  - Inversions (any voicing of Cmaj7 still names Cmaj7)
+  - Extensions (9, b9, #9, 11, #11, 13, b13)
+  - Foreign notes (out-of-scale notes flagged for Strict mode)
+  - Confidence levels (high / partial / ambiguous)
+- **No audio output** from the app. Metronome only. Designed for use with Ableton/Logic/hardware piano.
 
-**Decisions made without you**
-- Wrote two Weissman-adapted lessons instead of one, since "Circle of Fifths Progressions" alone made the lessons catalog look thin. "Inversions and Voice Leading" pulled from his coverage of inversions + voice-leading + half-step motion. Both translate cleanly to web; both cite the source.
-- Capped diatonic-7ths drill at 40 randomized items per session rather than full 84 (12 keys × 7 degrees) — felt long otherwise. Easy to raise if you disagree; see `js/drills.js`.
-- Used cycle-of-fourths order (counterclockwise: C → F → Bb → ...) for the drill, since that's how Davey's chart progresses. Both directions are correct — fourths is the jazz convention.
-- Lesson Markdown lives in `lessons-content/`, fetched at runtime. Cloudflare Pages serves it as static. No backend needed.
-- PianoPig video IDs verified via web search before seeding `data/inspiration.json` — all 6 videos are real and embeddable.
+**Deferred (tracked in CLAUDE.md "Deferred items")**
+- Audio synth with sample-based grand piano
+- Stats tracking (per-chord practice + mistake counts)
+- Cloudflare KV cross-device sync
+- VexFlow engraver-quality notation
+- Photograph extraction script for Weissman book
+- Strict-mode error visualization on staff
+- Voice-leading mode (PianoPig step 5)
+
+**Decisions made**
+- Cormorant Garamond as display font (replaced Fraunces). More contemplative, fits late-night piano practice mood.
+- No "Lessons" section — replaced by Book which renders Weissman directly from photos.
+- No "Reference" section — chord dictionary was rejected as fluff in previous review.
+- Strict-mode advance requires both: (a) all required chord tones present, (b) no foreign notes played. The 5th is optional. This allows rootless and 3+7 voicings to satisfy the target.
+- BPM input combines: numeric typing, scroll wheel, +/- buttons. DAW-style as requested.
+- Chord-quality detection biases toward "lower note is the 3rd" for 2-note rootless skeletons, since that's the standard jazz comping shape. Truly ambiguous skeletons (Eb+Bb could be Cm7's b3+b7 OR Bmaj7's 3+7) default to maj7 priority. In Practice mode the target is known so this only affects Play.
 
 **To verify in AM**
-- [ ] `/play` shows welcome card when no MIDI, hides it when device connects
-- [ ] Chord overlay no longer clips into the keyboard frame border (visible bug from previous build)
-- [ ] Sidebar collapses to drawer below ~860px viewport; hamburger button toggles it
-- [ ] Mute toggle silences the synth + persists across page reload
-- [ ] `/reference/chords` — click Cmaj7 → mini keyboard highlights, hear chord
-- [ ] `/drill/cycle-ii-v-i` — start drill → ghost notes appear, play them → advances
-- [ ] `/lessons/circle-of-fifths-progressions` → click `[[Dm7 → G7 → Cmaj7]]` → mini panel opens, all 3 steps playable
-- [ ] `/inspiration` → 6 videos load; tag filter narrows list
-
-**Known limitations / not done**
-- Falling-notes improv mode — top of next-task list (CLAUDE.md task 1).
-- No sample-based piano sounds yet — framework in place, oscillator is default.
-- Book/PDF extraction workflow — explicitly deferred per Ogbi's request. Lessons hand-written for now.
-- No drill leaderboards or cross-session graphs — stats are per-drill cumulative only.
+- [ ] Sidebar collapses to drawer below 860px; hamburger toggles it
+- [ ] Play page: keyboard floats, sheet music above syncs with keyboard, atmospheric drift changes with chord quality
+- [ ] Practice → Progressions: pick "ii-V-I", click a key pill, play through. Strict highlights one chord, Loose all equal.
+- [ ] Practice → Three Chords: shows maj7/7/m7 in the current key
+- [ ] Wrong notes flash subtle red in Strict only
+- [ ] Metronome: click ▶, soft brush sound at 70 BPM
+- [ ] Book page shows "not yet photographed"
+- [ ] Inspiration shows 6 videos with working YouTube embeds
 
 **Blockers**
 - None.

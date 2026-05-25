@@ -1,5 +1,5 @@
 // midi.js — passive Web MIDI listener.
-// Bitwise status-byte parsing. Note On 0x90, Note Off 0x80, CC 0xB0 (CC#64 = sustain).
+// Bitwise status parsing. Note On 0x90, Note Off 0x80, CC 0xB0 (CC#64 = sustain).
 // sysex:false, no exclusive access — coexists with DAWs.
 
 const MIDI = (() => {
@@ -58,18 +58,16 @@ const MIDI = (() => {
       bindInputs(access);
       access.onstatechange = () => bindInputs(access);
     } catch (err) {
-      console.error(err);
       emitStatus('MIDI access denied', 'error');
     }
   }
   function bindInputs(access) {
     const inputs = [...access.inputs.values()];
-    if (inputs.length === 0) { emitStatus('No MIDI device detected', 'idle'); return; }
+    if (inputs.length === 0) { emitStatus('No MIDI device', 'idle'); return; }
     inputs.forEach(input => { input.onmidimessage = handleMessage; });
     emitStatus(inputs[0].name || 'MIDI device', 'live');
   }
 
-  // Virtual play (mouse/touch on visual keyboards, programmatic chord previews)
   function virtualNoteOn(midi, velocity = 100) {
     heldNotes.add(midi);
     sustainedNotes.delete(midi);
@@ -77,13 +75,9 @@ const MIDI = (() => {
     emitChange();
   }
   function virtualNoteOff(midi) { handleNoteOff(midi); }
-  function clearAll() {
-    heldNotes.clear();
-    sustainedNotes.clear();
-    emitChange();
-  }
+  function getSounding() { return new Set([...heldNotes, ...sustainedNotes]); }
 
-  return { init, on, virtualNoteOn, virtualNoteOff, clearAll };
+  return { init, on, virtualNoteOn, virtualNoteOff, getSounding };
 })();
 
 if (typeof window !== 'undefined') window.MIDI = MIDI;

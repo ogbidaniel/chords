@@ -1,100 +1,79 @@
-# CLAUDE.md — overnight agent instructions
+# CLAUDE.md — agent instructions
 
-Working on `chords` at danielogbuigwe.com/chords. Owner is asleep. Commit to `main`. Reviewed in the morning.
-
-## Update protocol
-
-- One focused change per commit, clear message
-- One-line entry to `STATUS.md` per session: timestamp, what changed, what to verify, blockers
-- For ambiguity: defensible call, log under "Decisions made without you". Don't block.
-
-## Architecture in 30 seconds
-
-Vanilla JS, no framework, no build step. Hash-router SPA with five sections + an embedded keyboard component. Files load in dependency order via plain `<script>` tags.
-
-Five sections, one route prefix each: `/play`, `/reference/*`, `/drill/*`, `/lessons/*`, `/inspiration`. Sidebar nav (persistent desktop, drawer mobile) is in the top-level shell, not per-page.
-
-**Module map:**
-- `js/theory.js` — chord detection (PC-set), Roman numerals, diatonic builders. Pure.
-- `js/midi.js` — passive Web MIDI listener (sysex:false). Sustain. Coexists with DAWs.
-- `js/audio.js` — synth layer with pluggable backend. Default Web Audio oscillator. Mute persisted.
-- `js/keyboard.js` — SVG keybed. setActive/setHints/clearHints. Tap handlers.
-- `js/drills.js` — drill catalog + progression library + localStorage stats.
-- `js/router.js` — minimal hash router, no deps.
-- `js/pages/*.js` — one module per section. Each exports `render(params, mainEl)`.
-- `js/app.js` — top-level wiring. Loads last.
-- `lessons-content/*.md` — lesson source. Loaded by `js/pages/lessons.js` via fetch.
-- `data/inspiration.json` — YouTube embed seed data.
+Working on `chords` — jazz piano practice app. Owner is a researcher learning jazz piano with PianoPig as primary teacher (no in-person teacher). The previous build attempts overengineered. This rebuild is deliberately narrower.
 
 ## Hard constraints — don't break these
 
-- **Web MIDI must stay passive.** `sysex: false`, no exclusive access. Ableton must keep working alongside.
-- **Pitch-class detection** — voicings/inversions/doublings must continue to register. Don't regress to exact-MIDI matching.
-- **No build step.** No framework, no bundler, no npm runtime deps. The HTML `<script>` tags ARE the dependency graph.
-- **No analytics or trackers.** Not even Plausible. None.
-- **No tracking-pixel YouTube embeds.** Use `youtube.com/embed/...` with `rel=0`. Don't add anything beyond that.
-- **No secrets in code or repo.** Cloudflare deploys via Git connection — no API tokens in this repo.
+- **Web MIDI passive.** `sysex: false`, no exclusive access. Ableton must keep working alongside.
+- **No in-app audio output.** No synth. The owner plays through Ableton or hardware. Metronome (brush sample) is the only sound.
+- **Pitch-class detection.** Chord recognition is voicing-invariant. Cmaj7 is Cmaj7 no matter how it's voiced.
+- **No build step.** No framework, no bundler. The HTML `<script>` tags are the dependency graph.
+- **No analytics, no trackers, no third-party scripts** beyond Google Fonts and YouTube embeds (Inspiration section only).
 - **Mobile-first.** Test at 380px before committing visual changes.
-- **Don't break the sidebar drawer.** Toggle via `body.drawer-open` class. Scrim closes it.
-- **Markdown rendering must remain XSS-safe** — `lessons-content/*.md` is trusted, but the renderer escapes HTML before re-inserting chord pills. Keep that order.
+- **Strict-mode wrong-note flash must be subtle.** Desaturated red, ~0.6s, single-shot animation. No audio cue. The owner explicitly asked for non-jarring feedback.
+- **Don't reintroduce removed features without asking.** No 300-cell chord reference grid, no scale grid, no intervals page. Those were rejected. The app has FOUR sections: Play, Practice, Book, Inspiration. That's it.
 
-## Lesson Markdown syntax
+## PianoPig's curriculum is the spine
 
-`[[Cmaj7]]` becomes a clickable chord pill. `[[Dm7 → G7 → Cmaj7]]` becomes a stepped progression. Both expand a mini-keyboard panel underneath when clicked. The parser handles slash chords (`[[C/E]]`).
+From his Practice Plan PDF, his six steps:
 
-Supported chord suffixes — see `parseChordName` in `js/pages/lessons.js` for the canonical list. Adding new chord qualities requires updating both `Theory.QUALITIES` and the suffix map.
+1. Practice all 3 chord types (maj7, dom7, m7) in every key
+2. Play through jazz standards using those chords
+3. Practice inversions of all 3 chord types in every key
+4. Play through standards using inverted chords
+5. Use combinations of inversions to minimize hand movement
+6. Repeat over more standards until easy
 
-## Source material
+The Practice page's two sub-modes embody this:
+- **Three Chords** = steps 1 + 3 (chord types in every key, with inversion focus)
+- **Progressions** = steps 2 + 4 + 5 + 6 (applied to tunes, with mixed inversions)
 
-- **Dyas (Monk Institute)** — 5 chord qualities, Cat A/B voicings, ii-V-I in major/minor, voice-leading rules, common forms, chord-scale relationships.
-- **Davey (Mt. Hood)** — Guide tones (3rd/7th), guide-tones-plus-one, cycle-of-fourths ii-V-I in all 12 keys with Form A1/A2/B1/B2.
-- **Weissman (Alfred Handy Guide)** — Basic chord progressions, inversions, voice leading, circle of fifths, half-step motion. Lessons in `lessons-content/` are Weissman-adapted.
+If you add features, ask which of these six steps it supports. If it doesn't support one, it probably shouldn't ship.
 
-Cite the source in any new lesson's YAML front matter and in any new drill's `source` field.
+## Deferred items (paused, NOT cancelled)
 
-## Ranked next tasks
+These are tracked in `STATUS.md`. Don't silently ship them; surface them when relevant.
 
-Pick one, commit, log, pick the next.
+1. **Audio synth** — sampled grand piano with pitch-adjustment from a single middle C sample. Architecture: a backend interface in `js/audio.js` (future), pluggable, default = no sound, optional = sample.
+2. **Stats tracking** — strict-mode wrong-note counts and practice-session counts per chord, in localStorage. Schema designed; UI to surface as a small inline readout when implemented.
+3. **Cross-device sync** — Cloudflare KV. Free tier sufficient for one user. Wire into Practice stats when both are ready.
+4. **VexFlow notation** — engraver-quality staff. Replace `js/staff.js` Staff module behind same interface (`setNotes(midiArr, stateMap)`).
+5. **Photograph extraction** — script to OCR/extract from photographed pages of Weissman's book into `data/weissman-book.json`. One Claude API call per page. Output schema:
+   ```
+   { page, section, progression, key, prose, chords: [{name, notes}], song_examples }
+   ```
+6. **Strict-mode error visualization on the staff** — per-chord mistakes shown beneath the staff as a small dot grid.
+7. **Voice-leading mode** — PianoPig step 5. App computes the smoothest path through a progression and visualizes it on the keyboard as connecting lines.
 
-1. **Falling-notes improv mode** — separate view at `/improv` or `/practice/scroll`. Notes scroll down the screen toward the keybed at configurable tempo; user plays them as they cross the strike line. Start with a hardcoded ii-V-I loop in C, BPM slider, no scoring yet. *This is the highest-impact next feature — the gamified mode Ogbi has mentioned twice now.*
+## Module map
 
-2. **More Weissman-style lessons** — adapt the existing physical book content to web. Topics to cover: blues progressions (12-bar), turnarounds (I-vi-ii-V), half-step motion in chord changes, secondary dominants. One lesson per commit. Use the same Markdown + `[[Chord]]` format. Add slug to the `LESSONS` array in `js/pages/lessons.js`.
-
-3. **Two-handed voicings drill** — extend `js/drills.js` with the Davey 5-note voicings from the Form A1/A2/B1/B2 charts. Lower hand 2 notes + upper hand 3 notes. New drill ID: `two-handed-cycle`.
-
-4. **Chord-scale relationship view** — when a chord is detected on the Play page, dim-highlight the related scale notes on the keyboard. E.g. play Cmaj7 → C major scale notes glow at low opacity. Toggle in the right sidebar.
-
-5. **Sample-based audio backend** — register a Tone.js backend at `Audio.registerBackend('grand-piano', ...)`. Lazy-load samples only when selected. Source: Salamander Grand Piano free samples. Adds ~2MB but only on opt-in. Show backend selector in sidebar near the mute toggle.
-
-6. **Tonic selector for drills** — let the user start the cycle drill at a chosen tonic instead of always C. UI: a 12-button row above the keyboard.
-
-7. **Upper-structure triads panel** — Davey's chart. On the Play page, when user holds a dom7, show available upper-structure triads in a small side panel (II major, bV major, etc.).
-
-8. **Tap-input on the chord-quality flashcards drill** for mobile users without a MIDI device. Each drill currently requires playing the chord; add an alternate "tap on the keyboard" verification path.
-
-9. **Common-forms walkthrough** — a new section `/songs`. Tune chord changes from the Dyas handout (Take the A Train, Blue Bossa, Autumn Leaves), bar-by-bar with target voicings and a metronome.
-
-10. **Color-coded function on the keyboard** — tonic chords subtly tinted gold, predominants blue-grey, dominants orange. Visual reinforcement of harmonic function during free play.
-
-## Don'ts
-
-- Don't introduce a build step
-- Don't add React/Vue/Svelte or a bundler
-- Don't claim exclusive MIDI access (`sysex: false` always)
-- Don't break the 380px mobile viewport
-- Don't add tracking, analytics, or third-party scripts beyond Google Fonts (already loaded) and YouTube embeds (only for inspiration page)
-- Don't ship audio samples by default — they go through the registerBackend opt-in
-- Don't put real chord-name strings in route parameters; use rootPc + qualityKey
+- `js/theory.js` — primitives, structured chord detection, Roman parser, progression realizer. Tested in node, pure functions.
+- `js/midi.js` — passive Web MIDI. Bitwise parsing. Sustain CC#64.
+- `js/keyboard.js` — SVG keybed. Multi-state highlighting.
+- `js/staff.js` — simplified grand staff renderer.
+- `js/metronome.js` — Web Audio brush metronome.
+- `js/router.js` — hash router.
+- `js/pages/play.js` — home, free play with detection.
+- `js/pages/practice.js` — the main practice loop. Both sub-modes here.
+- `js/pages/book.js` — placeholder for photographed book pages.
+- `js/pages/inspiration.js` — YouTube grid.
+- `js/app.js` — top-level wiring.
 
 ## Where things live
 
-- Routes: `js/app.js` (registration block)
-- Sidebar nav items: `js/app.js` (navItems array)
-- Chord qualities: `js/theory.js` → `QUALITIES`
-- Scales: `js/theory.js` → `SCALES`
-- Drills: `js/drills.js` → `CATALOG`
-- Lessons: `js/pages/lessons.js` → `LESSONS` + `lessons-content/*.md`
-- Inspiration videos: `data/inspiration.json`
-- Cycle drill order: `js/theory.js` → `CYCLE_FOURTHS`
+- Add new progressions: `data/progressions.json`
+- Add new videos: `data/inspiration.json`
+- Add new chord types: `js/theory.js` → `CHORD_TYPES` and `TYPE_PRIORITY`
+- Atmospheric color mapping: `styles.css` → `body.quality-*` selectors
+- Strict-mode advance logic: `js/pages/practice.js` → `refreshKeyboard`
 
-When in doubt, the source PDFs are the ground truth. Cite them.
+## Don'ts
+
+- Don't add a build step
+- Don't claim exclusive MIDI access
+- Don't introduce a framework
+- Don't reintroduce dropped sections (chord reference grid, scale grid, intervals page, separate drill catalog)
+- Don't make the wrong-note flash loud or audible
+- Don't auto-advance the progression in Loose mode — Loose mode = free exploration
+- Don't put text in route parameters that needs decoding beyond URL-safe slugs
+- Don't paraphrase Weissman's book content in the app; the Book section is supposed to be his book, page by page, from photographs

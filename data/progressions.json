@@ -1,0 +1,100 @@
+{
+  "progressions": [
+    {
+      "id": "ii-V-I",
+      "name": "ii–V–I",
+      "roman": ["IIm7", "V7", "Imaj7"],
+      "defaultKey": "C",
+      "source": "PianoPig — the foundation",
+      "tags": ["jazz", "essential", "fundamental"]
+    },
+    {
+      "id": "I-V7",
+      "name": "I V⁷",
+      "roman": ["I", "V7"],
+      "defaultKey": "C",
+      "source": "Weissman p.3",
+      "tags": ["folk", "simple", "foundational"]
+    },
+    {
+      "id": "I-IV",
+      "name": "I IV",
+      "roman": ["I", "IV"],
+      "defaultKey": "C",
+      "source": "Weissman p.3",
+      "tags": ["folk", "simple"]
+    },
+    {
+      "id": "I-IV-V7",
+      "name": "I IV V⁷",
+      "roman": ["I", "IV", "V7"],
+      "defaultKey": "C",
+      "source": "Weissman p.4",
+      "tags": ["folk", "country", "essential"]
+    },
+    {
+      "id": "I-V7-IV",
+      "name": "I V⁷ IV",
+      "roman": ["I", "V7", "IV"],
+      "defaultKey": "C",
+      "source": "Weissman p.5",
+      "tags": ["folk", "country", "pop-rock"]
+    },
+    {
+      "id": "I-vi-IV-V",
+      "name": "I vi IV V",
+      "roman": ["I", "vi", "IV", "V"],
+      "defaultKey": "C",
+      "source": "Common pop changes (50s progression)",
+      "tags": ["pop", "doo-wop"]
+    },
+    {
+      "id": "I-vi-ii-V",
+      "name": "I vi ii V",
+      "roman": ["I", "vi", "IIm7", "V7"],
+      "defaultKey": "C",
+      "source": "Jazz turnaround",
+      "tags": ["jazz", "turnaround"]
+    },
+    {
+      "id": "minor-ii-V-i",
+      "name": "iiø V⁷ i",
+      "roman": ["IIm7b5", "V7", "Im7"],
+      "defaultKey": "C",
+      "source": "Minor cousin of ii-V-I",
+      "tags": ["jazz", "minor", "essential"]
+    },
+    {
+      "id": "autumn-leaves",
+      "name": "Autumn Leaves (A section)",
+      "roman": ["IIm7", "V7", "Imaj7", "IVmaj7", "VIIm7b5", "III7", "VIm"],
+      "defaultKey": "G",
+      "source": "PianoPig — applied jazz tune",
+      "tags": ["standard", "jazz", "tune"]
+    },
+    {
+      "id": "all-the-things-A",
+      "name": "All The Things You Are (A1)",
+      "roman": ["VIm7", "IIm7", "V7", "Imaj7", "IVmaj7"],
+      "defaultKey": "Ab",
+      "source": "PianoPig — applied jazz tune",
+      "tags": ["standard", "jazz", "tune"]
+    },
+    {
+      "id": "blue-bossa",
+      "name": "Blue Bossa (16-bar)",
+      "roman": ["Im7", "IVm7", "IIm7b5", "V7", "Im7"],
+      "defaultKey": "C",
+      "source": "Dyas — Monk Institute",
+      "tags": ["standard", "jazz", "tune", "minor"]
+    },
+    {
+      "id": "rhythm-changes-A",
+      "name": "Rhythm Changes (A section)",
+      "roman": ["Imaj7", "VIm7", "IIm7", "V7"],
+      "defaultKey": "Bb",
+      "source": "Gershwin",
+      "tags": ["standard", "jazz", "turnaround"]
+    }
+  ]
+}

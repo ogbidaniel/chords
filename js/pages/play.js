@@ -1,198 +1,112 @@
-// pages/play.js — the home page. Keyboard + live chord detection.
+// pages/play.js — the home page. Floating keyboard + live chord recognition.
 
 const PagePlay = (() => {
   let keyboard = null;
-  let detected = null;
-  let lastSounding = new Set();
-  let inspirationVideos = [];
-
-  // Pull a sample video for the "watch" widget
-  async function loadInspiration() {
-    if (inspirationVideos.length) return inspirationVideos;
-    try {
-      const res = await fetch('./data/inspiration.json');
-      const data = await res.json();
-      inspirationVideos = data.videos || [];
-    } catch (e) { inspirationVideos = []; }
-    return inspirationVideos;
-  }
-
-  function pickFeaturedVideo() {
-    if (!inspirationVideos.length) return null;
-    return inspirationVideos[Math.floor(Math.random() * inspirationVideos.length)];
-  }
+  let staff = null;
 
   function render(params, mainEl) {
     mainEl.innerHTML = `
-      <div class="play-page">
-        <div class="play-stage">
-          <div class="play-keyboard-card">
-            <div class="overlay-layer" id="overlay-layer"></div>
-            <div id="piano-container" class="piano-container"></div>
-            <div class="piano-meta mono">
-              <span>C2 → C6 · 49 keys · passive · tap to play</span>
-            </div>
-          </div>
+      <div class="play-room">
 
-          <div class="play-readout">
-            <div class="readout-cell readout-cell-main">
-              <span class="cell-eyebrow mono">Detected</span>
-              <span class="cell-value display" id="detect-name">—</span>
-              <span class="cell-roman mono" id="detect-roman"></span>
-            </div>
-            <div class="readout-cell">
-              <span class="cell-eyebrow mono">Notes</span>
-              <span class="cell-value-mono mono" id="detect-notes">—</span>
-            </div>
-            <div class="readout-cell">
-              <span class="cell-eyebrow mono">Pitch classes</span>
-              <span class="cell-value-mono mono" id="detect-pcs">—</span>
-            </div>
+        <div class="play-welcome" id="play-welcome" hidden>
+          <p class="welcome-eyebrow mono">Welcome</p>
+          <p class="welcome-text">A room for jazz piano practice. Plug in a MIDI keyboard, or tap the keys below to begin.</p>
+          <p class="welcome-text-dim">The page listens passively — Ableton, Logic, any DAW can run alongside. No sound comes from the app; play through your DAW or hardware.</p>
+        </div>
+
+        <div class="chord-display-row">
+          <div class="chord-display" id="chord-display">
+            <span class="chord-name display" id="chord-name-text">—</span>
+            <span class="chord-detail mono" id="chord-detail-text"></span>
           </div>
         </div>
 
-        <aside class="play-side">
-          <div class="side-card" id="welcome-card" hidden>
-            <span class="cell-eyebrow mono">Welcome</span>
-            <p class="side-prose">
-              Plug in a MIDI keyboard to start. The page listens passively — Ableton or any DAW can run at the same time.
-            </p>
-            <p class="side-prose">
-              No MIDI on hand? Tap or click the keys directly. Same chord detection, same live feedback.
-            </p>
-            <div class="side-tip mono">Browsers: Chrome · Edge · Opera</div>
-          </div>
+        <div class="staff-wrap">
+          <div id="staff-container"></div>
+        </div>
 
-          <div class="side-card" id="watch-card">
-            <span class="cell-eyebrow mono">Watch</span>
-            <div id="watch-content">Loading…</div>
-            <a class="side-link mono" href="#/inspiration">More clips →</a>
-          </div>
+        <div class="keyboard-wrap">
+          <div id="play-piano"></div>
+        </div>
 
-          <div class="side-card side-card-quiet">
-            <span class="cell-eyebrow mono">Quick jump</span>
-            <ul class="side-list">
-              <li><a href="#/drill">Run a drill →</a></li>
-              <li><a href="#/reference/chords">Chord reference →</a></li>
-              <li><a href="#/reference/circle">Circle of fifths →</a></li>
-              <li><a href="#/lessons">Lessons →</a></li>
-            </ul>
-          </div>
-        </aside>
+        <div class="play-footer mono">
+          C2 → C6 · passive listener · tap keys if no device
+        </div>
+
       </div>
     `;
 
-    // Build keyboard
+    // Build components
     keyboard = Keyboard.create({
-      container: '#piano-container',
-      onPress: (m) => { MIDI.virtualNoteOn(m); Audio.play(m); },
-      onRelease: (m) => { MIDI.virtualNoteOff(m); Audio.stop(m); },
+      container: '#play-piano',
+      low: 36, high: 84,
+      onPress: m => MIDI.virtualNoteOn(m),
+      onRelease: m => MIDI.virtualNoteOff(m),
     });
 
-    // Detection wiring
-    MIDI.on('change', onChange);
-    MIDI.on('note', onNote);
-    MIDI.on('status', onStatus);
+    staff = Staff.create({ container: '#staff-container' });
 
-    // Load watch widget
-    loadInspiration().then(() => {
-      const video = pickFeaturedVideo();
-      const watch = document.getElementById('watch-content');
-      if (!watch) return;
-      if (!video) { watch.textContent = 'No videos yet.'; return; }
-      const params = video.type === 'short' ? '' : '?rel=0';
-      watch.innerHTML = `
-        <div class="video-embed">
-          <iframe src="https://www.youtube.com/embed/${video.id}${params}"
-                  title="${escapeHtml(video.title)}"
-                  frameborder="0"
-                  allow="accelerometer; encrypted-media; picture-in-picture"
-                  allowfullscreen></iframe>
-        </div>
-        <p class="video-title">${escapeHtml(video.title)}</p>
-        <p class="video-meta mono">${escapeHtml(video.creator)}</p>
-      `;
-    });
+    MIDI.on('change', onSoundingChange);
+    MIDI.on('status', onMidiStatus);
+
+    onSoundingChange(MIDI.getSounding());
   }
 
-  function onStatus(text, kind) {
-    // Show welcome card when there's no device
-    const welcomeCard = document.getElementById('welcome-card');
-    if (welcomeCard) welcomeCard.hidden = (kind === 'live');
+  function onMidiStatus(text, kind) {
+    const welcome = document.getElementById('play-welcome');
+    if (welcome) welcome.hidden = (kind === 'live');
   }
 
-  function onNote(midi, vel, isOn) {
-    if (isOn) Audio.play(midi, vel);
-    else Audio.stop(midi);
-  }
+  function onSoundingChange(sounding) {
+    if (!keyboard || !staff) return;
+    keyboard.setPlaying(sounding);
 
-  function onChange(sounding) {
-    lastSounding = sounding;
-    if (!keyboard) return;
-    keyboard.setActive(sounding);
+    const detected = sounding.size >= 2 ? Theory.detectChord(sounding) : null;
 
-    const name = document.getElementById('detect-name');
-    const roman = document.getElementById('detect-roman');
-    const notes = document.getElementById('detect-notes');
-    const pcs = document.getElementById('detect-pcs');
-    if (!name) return; // route may have changed
+    // Mirror notes on staff
+    const stateMap = new Map();
+    [...sounding].forEach(m => stateMap.set(m, 'playing'));
+    staff.setNotes([...sounding], stateMap);
 
-    if (sounding.size === 0) {
-      name.textContent = '—';
-      roman.textContent = '';
-      notes.textContent = '—';
-      pcs.textContent = '—';
-      hideOverlay();
-      return;
-    }
-    const sorted = [...sounding].sort((a, b) => a - b);
-    notes.textContent = sorted.map(Keyboard.noteLabel).join(' · ');
-    pcs.textContent = [...new Set(sorted.map(m => Theory.SHARP_NAMES[m % 12]))].join(' · ');
-
-    const chord = Theory.detectChord(sounding);
-    if (chord) {
-      name.textContent = chord.name;
-      const r = Theory.romanInKey(chord.rootPc, chord.quality, 0);
-      roman.textContent = r ? `${r.roman} in C` : '';
-      showOverlay(chord, sounding);
+    // Update chord readout
+    const nameEl = document.getElementById('chord-name-text');
+    const detailEl = document.getElementById('chord-detail-text');
+    if (!nameEl) return;
+    if (detected) {
+      nameEl.textContent = Theory.chordName(detected);
+      detailEl.textContent = formatDetail(detected);
+      setAtmosphere(detected.type);
+    } else if (sounding.size > 0) {
+      const notes = [...sounding].sort((a,b)=>a-b).map(m => Theory.SHARP_NAMES[m % 12]);
+      nameEl.textContent = notes.join(' · ');
+      detailEl.textContent = '';
+      setAtmosphere(null);
     } else {
-      name.textContent = '—';
-      roman.textContent = '';
-      hideOverlay();
+      nameEl.textContent = '—';
+      detailEl.textContent = '';
+      setAtmosphere(null);
     }
   }
 
-  let overlayEl = null;
-  function showOverlay(chord, sounding) {
-    if (!keyboard || sounding.size === 0) { hideOverlay(); return; }
-    const xs = [...sounding].map(m => keyboard.getCenter(m)?.cx).filter(v => v != null);
-    if (xs.length === 0) { hideOverlay(); return; }
-    const cxVB = xs.reduce((a, b) => a + b, 0) / xs.length;
-
-    const overlayLayer = document.getElementById('overlay-layer');
-    if (!overlayLayer) return;
-    const svg = keyboard.getSvg();
-    const svgRect = svg.getBoundingClientRect();
-    const layerRect = overlayLayer.getBoundingClientRect();
-    const scale = svgRect.width / keyboard.vbWidth();
-    const pxX = (svgRect.left - layerRect.left) + cxVB * scale;
-
-    if (!overlayEl) {
-      overlayEl = document.createElement('div');
-      overlayEl.className = 'chord-overlay';
-      overlayEl.innerHTML = `<div class="roman"></div><div class="cname mono"></div>`;
-      overlayLayer.appendChild(overlayEl);
-    }
-    const r = Theory.romanInKey(chord.rootPc, chord.quality, 0);
-    overlayEl.querySelector('.roman').textContent = r ? r.roman : '';
-    overlayEl.querySelector('.cname').textContent = chord.name;
-    overlayEl.style.left = `${pxX}px`;
-    overlayEl.style.opacity = '1';
+  function formatDetail(d) {
+    const parts = [];
+    if (d.isSkeleton) parts.push('rootless 3+7');
+    if (d.extensions.length) parts.push('+ ' + d.extensions.join(' '));
+    if (d.bass != null) parts.push('bass: ' + Theory.pcName(d.bass, Theory.preferFlat(d.bass)));
+    if (d.confidence !== 'high') parts.push(d.confidence);
+    return parts.join(' · ');
   }
-  function hideOverlay() { if (overlayEl) overlayEl.style.opacity = '0'; }
 
-  function escapeHtml(s) {
-    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  // Atmospheric color drift — set a CSS variable based on chord quality
+  function setAtmosphere(type) {
+    const body = document.body;
+    body.classList.remove('quality-major', 'quality-dominant', 'quality-minor', 'quality-half-dim', 'quality-dim');
+    if (!type) return;
+    if (type === 'maj7' || type === 'maj' || type === '6') body.classList.add('quality-major');
+    else if (type === '7') body.classList.add('quality-dominant');
+    else if (type === 'm7' || type === 'm') body.classList.add('quality-minor');
+    else if (type === 'm7b5') body.classList.add('quality-half-dim');
+    else if (type === 'dim7' || type === 'dim') body.classList.add('quality-dim');
   }
 
   return { render };
