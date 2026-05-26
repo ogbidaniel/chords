@@ -1,83 +1,101 @@
 // midi.js — passive Web MIDI listener.
-// Bitwise status parsing. Note On 0x90, Note Off 0x80, CC 0xB0 (CC#64 = sustain).
-// sysex:false, no exclusive access — coexists with DAWs.
+// Sysex disabled. Tracks held notes with velocity. Sustain pedal supported.
 
 const MIDI = (() => {
-  const NOTE_ON = 0x90, NOTE_OFF = 0x80, CC = 0xB0, CC_SUSTAIN = 64;
-  const heldNotes = new Set();
-  const sustainedNotes = new Set();
+  const listeners = {
+    change: new Set(),  // (heldMap, lastVelocity) => void
+    status: new Set(),  // (text, kind) => void
+    noteOn: new Set(),  // (midi, velocity) => void
+    noteOff: new Set(), // (midi) => void
+  };
+
+  const heldNotes = new Map();      // midi → velocity (0-127)
+  const sustainedNotes = new Map(); // midi → velocity (still sounding after release while sustain on)
   let sustainOn = false;
-  const listeners = { change: new Set(), status: new Set(), note: new Set() };
+  let lastVelocity = 0;
 
-  function emitChange() {
-    const sounding = new Set([...heldNotes, ...sustainedNotes]);
-    listeners.change.forEach(fn => fn(sounding, sustainOn));
+  function emit(name, ...args) {
+    listeners[name].forEach(fn => { try { fn(...args); } catch (e) { console.error(e); } });
   }
-  function emitStatus(text, kind) { listeners.status.forEach(fn => fn(text, kind)); }
-  function emitNote(midi, vel, on)  { listeners.note.forEach(fn => fn(midi, vel, on)); }
-  function on(event, fn) { listeners[event]?.add(fn); }
 
-  function handleMessage(e) {
-    const d = e.data;
-    if (!d || d.length < 1) return;
-    const type = d[0] & 0xF0;
-    const d1 = d[1] ?? 0;
-    const d2 = d[2] ?? 0;
-    if (type === NOTE_ON) {
-      if (d2 === 0) { handleNoteOff(d1); return; }
-      heldNotes.add(d1);
-      sustainedNotes.delete(d1);
-      emitNote(d1, d2, true);
-      emitChange();
-    } else if (type === NOTE_OFF) {
-      handleNoteOff(d1);
-    } else if (type === CC && d1 === CC_SUSTAIN) {
-      const down = d2 >= 64;
-      if (down !== sustainOn) {
-        sustainOn = down;
-        if (!sustainOn) sustainedNotes.clear();
-        emitChange();
+  // Build a Map of currently-sounding notes (held ∪ sustained)
+  function getSounding() {
+    const out = new Map(heldNotes);
+    for (const [k, v] of sustainedNotes) out.set(k, v);
+    return out;
+  }
+
+  function onMessage(e) {
+    const [status, data1, data2] = e.data;
+    const cmd = status & 0xf0;
+    if (cmd === 0x90 && data2 > 0) {
+      heldNotes.set(data1, data2);
+      sustainedNotes.delete(data1);
+      lastVelocity = data2;
+      emit('noteOn', data1, data2);
+      emit('change', getSounding(), data2);
+    } else if (cmd === 0x80 || (cmd === 0x90 && data2 === 0)) {
+      if (heldNotes.has(data1)) {
+        const v = heldNotes.get(data1);
+        heldNotes.delete(data1);
+        if (sustainOn) {
+          sustainedNotes.set(data1, v);
+        } else {
+          emit('noteOff', data1);
+        }
+        emit('change', getSounding(), 0);
       }
-    }
-  }
-  function handleNoteOff(note) {
-    if (heldNotes.delete(note)) {
-      if (sustainOn) sustainedNotes.add(note);
-      emitNote(note, 0, false);
-      emitChange();
+    } else if (cmd === 0xb0 && data1 === 64) {
+      sustainOn = data2 >= 64;
+      if (!sustainOn) {
+        for (const [k] of sustainedNotes) emit('noteOff', k);
+        sustainedNotes.clear();
+        emit('change', getSounding(), 0);
+      }
     }
   }
 
   async function init() {
     if (!navigator.requestMIDIAccess) {
-      emitStatus('Web MIDI unsupported', 'error');
+      emit('status', 'No MIDI in this browser', 'error');
       return;
     }
     try {
       const access = await navigator.requestMIDIAccess({ sysex: false });
-      bindInputs(access);
-      access.onstatechange = () => bindInputs(access);
-    } catch (err) {
-      emitStatus('MIDI access denied', 'error');
+      attach(access);
+      access.onstatechange = () => attach(access);
+    } catch (e) {
+      emit('status', 'MIDI permission denied', 'error');
     }
   }
-  function bindInputs(access) {
-    const inputs = [...access.inputs.values()];
-    if (inputs.length === 0) { emitStatus('No MIDI device', 'idle'); return; }
-    inputs.forEach(input => { input.onmidimessage = handleMessage; });
-    emitStatus(inputs[0].name || 'MIDI device', 'live');
+
+  function attach(access) {
+    let count = 0;
+    for (const input of access.inputs.values()) {
+      input.onmidimessage = onMessage;
+      count++;
+    }
+    if (count > 0) emit('status', count === 1 ? 'MIDI ready' : `${count} MIDI inputs`, 'live');
+    else emit('status', 'No MIDI device — tap keys', 'idle');
   }
 
+  // Allow virtual keyboard taps to feed MIDI events
   function virtualNoteOn(midi, velocity = 100) {
-    heldNotes.add(midi);
-    sustainedNotes.delete(midi);
-    emitNote(midi, velocity, true);
-    emitChange();
+    onMessage({ data: [0x90, midi, velocity] });
   }
-  function virtualNoteOff(midi) { handleNoteOff(midi); }
-  function getSounding() { return new Set([...heldNotes, ...sustainedNotes]); }
+  function virtualNoteOff(midi) {
+    onMessage({ data: [0x80, midi, 0] });
+  }
 
-  return { init, on, virtualNoteOn, virtualNoteOff, getSounding };
+  return {
+    init,
+    on: (event, fn) => listeners[event].add(fn),
+    off: (event, fn) => listeners[event].delete(fn),
+    getSounding,
+    getLastVelocity: () => lastVelocity,
+    isSustainOn: () => sustainOn,
+    virtualNoteOn, virtualNoteOff,
+  };
 })();
 
 if (typeof window !== 'undefined') window.MIDI = MIDI;

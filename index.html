@@ -1,68 +1,52 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<meta name="theme-color" content="#0a0a0f" />
-<title>chords — jazz piano practice</title>
+  <meta charset="utf-8">
+  <title>chords · a practice room</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="A jazz piano practice room. Plug in a MIDI keyboard.">
+  <meta name="theme-color" content="#08080d">
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter+Tight:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter+Tight:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- VexFlow for engraved music notation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vexflow/4.2.3/vexflow.js"></script>
 </head>
 <body>
+  <div id="app-root"></div>
 
-<!-- Atmospheric drift layers -->
-<div class="bg-base"></div>
-<div class="bg-drift bg-drift-a"></div>
-<div class="bg-drift bg-drift-b"></div>
-<div class="bg-grain"></div>
+  <!-- Core modules (no DOM deps) -->
+  <script src="js/theory.js"></script>
+  <script src="js/midi.js"></script>
+  <script src="js/energy.js"></script>
+  <script src="js/keyboard.js"></script>
+  <script src="js/notation.js"></script>
+  <script src="js/metronome.js"></script>
+  <script src="js/router.js"></script>
+  <script src="js/practice-history.js"></script>
 
-<!-- Mobile drawer scrim -->
-<div id="sidebar-scrim" class="sidebar-scrim"></div>
+  <!-- Components -->
+  <script src="js/components/circle-of-fifths.js"></script>
+  <script src="js/components/drill-shell.js"></script>
 
-<aside class="sidebar" id="sidebar">
-  <div class="sidebar-head">
-    <a class="brand" href="#/play">
-      <span class="brand-glyph">◐</span>
-      <span class="brand-text mono">chords</span>
-    </a>
-  </div>
-  <nav class="side-nav" id="side-nav"></nav>
-  <div class="sidebar-foot">
-    <p class="sidebar-fineprint mono">Web MIDI: Chrome · Edge · Opera<br>Tap keys if no device<br>No audio output — use your DAW</p>
-  </div>
-</aside>
+  <!-- Pages -->
+  <script src="js/pages/play.js"></script>
+  <script src="js/pages/book.js"></script>
+  <script src="js/pages/inspiration.js"></script>
+  <script src="js/pages/practice/landing.js"></script>
+  <script src="js/pages/practice/scales-hub.js"></script>
+  <script src="js/pages/practice/scales-drill.js"></script>
+  <script src="js/pages/practice/chord-types-hub.js"></script>
+  <script src="js/pages/practice/chord-types-drill.js"></script>
+  <script src="js/pages/practice/progressions-hub.js"></script>
+  <script src="js/pages/practice/progressions-category.js"></script>
+  <script src="js/pages/practice/progressions-drill.js"></script>
 
-<header class="top-header">
-  <button class="drawer-toggle" id="drawer-toggle" aria-label="Menu">
-    <span></span><span></span><span></span>
-  </button>
-  <div class="top-spacer"></div>
-  <div class="top-status">
-    <span class="status-pill mono">
-      <span class="status-dot idle" id="midi-dot"></span>
-      <span id="midi-status-text">Connecting…</span>
-    </span>
-  </div>
-</header>
-
-<main id="main-pane" class="main-pane"></main>
-
-<!-- Scripts in dependency order -->
-<script src="./js/theory.js"></script>
-<script src="./js/midi.js"></script>
-<script src="./js/keyboard.js"></script>
-<script src="./js/staff.js"></script>
-<script src="./js/metronome.js"></script>
-<script src="./js/router.js"></script>
-<script src="./js/pages/play.js"></script>
-<script src="./js/pages/practice.js"></script>
-<script src="./js/pages/book.js"></script>
-<script src="./js/pages/inspiration.js"></script>
-<script src="./js/app.js"></script>
-
+  <!-- App wiring -->
+  <script src="js/app.js"></script>
 </body>
 </html>

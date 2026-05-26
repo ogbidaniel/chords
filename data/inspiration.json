@@ -1,46 +1,10 @@
 {
   "videos": [
-    {
-      "id": "2XAGmDxlnMM",
-      "title": "Another juicy minor 9 chord (drop-2 voicing)",
-      "creator": "PianoPig",
-      "type": "short",
-      "tags": ["voicings", "minor"]
-    },
-    {
-      "id": "h-1f6WZKZTM",
-      "title": "The ONLY chord you need to play jazz piano (3-5-7-9)",
-      "creator": "PianoPig",
-      "type": "long",
-      "tags": ["voicings", "shells"]
-    },
-    {
-      "id": "8kdyfL2-8eo",
-      "title": "4 awesome minor chord voicings",
-      "creator": "PianoPig",
-      "type": "long",
-      "tags": ["voicings", "minor", "rootless"]
-    },
-    {
-      "id": "LH6cVLbxSBE",
-      "title": "How to remember chords & voicings forever",
-      "creator": "PianoPig",
-      "type": "long",
-      "tags": ["practice"]
-    },
-    {
-      "id": "AZhk6BbIHiA",
-      "title": "This will transform your jazz piano voicings",
-      "creator": "PianoPig",
-      "type": "short",
-      "tags": ["voicings", "improv"]
-    },
-    {
-      "id": "N5ixm8iLMjI",
-      "title": "6 must-know jazz piano left-hand voicings",
-      "creator": "Michael Keithson",
-      "type": "long",
-      "tags": ["voicings", "left-hand", "comping"]
-    }
+    { "id": "Vmqy3MTwhJk", "title": "How I wish jazz chords were explained to me as a student", "creator": "PianoPig", "type": "lesson", "tags": ["foundation", "jazz", "chord types"] },
+    { "id": "RBJSGcQwQyk", "title": "Jazz piano comping for beginners", "creator": "PianoPig", "type": "lesson", "tags": ["jazz", "comping", "beginner"] },
+    { "id": "EaZBT8nZJVc", "title": "Voice leading explained", "creator": "PianoPig", "type": "lesson", "tags": ["jazz", "voicings"] },
+    { "id": "QQQ_ll2Wf7M", "title": "Bill Evans plays 'Autumn Leaves'", "creator": "Bill Evans Trio", "type": "performance", "tags": ["jazz", "performance"] },
+    { "id": "lyoKvwBJXxw", "title": "Herbie Hancock — Cantaloupe Island", "creator": "Herbie Hancock", "type": "performance", "tags": ["jazz", "performance", "modal"] },
+    { "id": "DCQGW6Z9ato", "title": "The Real Book — what every jazz musician needs", "creator": "Michael Keithson", "type": "lesson", "tags": ["jazz", "real book"] }
   ]
 }

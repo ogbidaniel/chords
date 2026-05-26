@@ -1,4 +1,4 @@
-// router.js — minimal hash router. No framework.
+// router.js — hash router with :param support.
 
 const Router = (() => {
   const routes = [];
@@ -51,8 +51,9 @@ const Router = (() => {
     window.addEventListener('hashchange', handleChange);
     handleChange();
   }
+  function current() { return currentPath; }
 
-  return { register, go, start, onChange };
+  return { register, go, start, onChange, current };
 })();
 
 if (typeof window !== 'undefined') window.Router = Router;

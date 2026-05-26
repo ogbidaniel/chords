@@ -1,11 +1,11 @@
-// pages/inspiration.js — curated YouTube embed feed with tag filters.
+// pages/inspiration.js — YouTube grid.
 
 const PageInspiration = (() => {
-  let videos = [];
+  let videos = null;
   let activeTag = null;
 
   async function load() {
-    if (videos.length) return;
+    if (videos) return;
     try {
       const res = await fetch('./data/inspiration.json');
       const data = await res.json();
@@ -20,7 +20,7 @@ const PageInspiration = (() => {
   }
 
   async function render(params, mainEl) {
-    mainEl.innerHTML = `<div class="inspiration-room"><p class="cell-eyebrow mono">Loading…</p></div>`;
+    mainEl.innerHTML = `<div class="page-room"><p class="cell-eyebrow mono">Loading…</p></div>`;
     await load();
     paint(mainEl);
   }
@@ -28,7 +28,7 @@ const PageInspiration = (() => {
   function paint(mainEl) {
     const filtered = activeTag ? videos.filter(v => v.tags && v.tags.includes(activeTag)) : videos;
     mainEl.innerHTML = `
-      <div class="inspiration-room">
+      <div class="page-room">
         <header class="page-header">
           <h1 class="display">Inspiration</h1>
           <p class="page-lede">A curated feed of jazz piano clips. Watch, then go play.</p>
@@ -41,17 +41,13 @@ const PageInspiration = (() => {
           ${filtered.map(v => `
             <div class="video-card">
               <div class="video-embed">
-                <iframe src="https://www.youtube.com/embed/${v.id}?rel=0"
-                        title="${escapeText(v.title)}"
-                        frameborder="0"
-                        allow="accelerometer; encrypted-media; picture-in-picture"
-                        allowfullscreen></iframe>
+                <iframe src="https://www.youtube.com/embed/${v.id}?rel=0" title="${esc(v.title)}" frameborder="0" allow="accelerometer; encrypted-media; picture-in-picture" allowfullscreen></iframe>
               </div>
               <div class="video-info">
-                <h3 class="video-card-title">${escapeText(v.title)}</h3>
-                <p class="video-meta mono">${escapeText(v.creator)} · ${v.type}</p>
+                <h3 class="video-card-title">${esc(v.title)}</h3>
+                <p class="video-meta mono">${esc(v.creator)} · ${esc(v.type)}</p>
                 <div class="video-tags">
-                  ${(v.tags || []).map(t => `<span class="video-tag mono">${escapeText(t)}</span>`).join('')}
+                  ${(v.tags || []).map(t => `<span class="video-tag mono">${esc(t)}</span>`).join('')}
                 </div>
               </div>
             </div>
@@ -66,8 +62,7 @@ const PageInspiration = (() => {
       });
     });
   }
-
-  function escapeText(s) {
+  function esc(s) {
     return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
 

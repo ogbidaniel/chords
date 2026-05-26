@@ -1,100 +1,112 @@
 {
   "progressions": [
     {
-      "id": "ii-V-I",
+      "id": "ii-v-i",
       "name": "ii–V–I",
+      "category": "tutorial",
       "roman": ["IIm7", "V7", "Imaj7"],
-      "defaultKey": "C",
-      "source": "PianoPig — the foundation",
-      "tags": ["jazz", "essential", "fundamental"]
+      "defaultKey": 0,
+      "source": "PianoPig — jazz fundamentals",
+      "summary": "The fundamental jazz cadence. Every standard uses this."
     },
     {
-      "id": "I-V7",
-      "name": "I V⁷",
-      "roman": ["I", "V7"],
-      "defaultKey": "C",
-      "source": "Weissman p.3",
-      "tags": ["folk", "simple", "foundational"]
-    },
-    {
-      "id": "I-IV",
-      "name": "I IV",
-      "roman": ["I", "IV"],
-      "defaultKey": "C",
-      "source": "Weissman p.3",
-      "tags": ["folk", "simple"]
-    },
-    {
-      "id": "I-IV-V7",
-      "name": "I IV V⁷",
-      "roman": ["I", "IV", "V7"],
-      "defaultKey": "C",
-      "source": "Weissman p.4",
-      "tags": ["folk", "country", "essential"]
-    },
-    {
-      "id": "I-V7-IV",
-      "name": "I V⁷ IV",
-      "roman": ["I", "V7", "IV"],
-      "defaultKey": "C",
-      "source": "Weissman p.5",
-      "tags": ["folk", "country", "pop-rock"]
-    },
-    {
-      "id": "I-vi-IV-V",
-      "name": "I vi IV V",
-      "roman": ["I", "vi", "IV", "V"],
-      "defaultKey": "C",
-      "source": "Common pop changes (50s progression)",
-      "tags": ["pop", "doo-wop"]
-    },
-    {
-      "id": "I-vi-ii-V",
-      "name": "I vi ii V",
-      "roman": ["I", "vi", "IIm7", "V7"],
-      "defaultKey": "C",
-      "source": "Jazz turnaround",
-      "tags": ["jazz", "turnaround"]
-    },
-    {
-      "id": "minor-ii-V-i",
-      "name": "iiø V⁷ i",
+      "id": "minor-ii-v-i",
+      "name": "minor ii–V–i",
+      "category": "tutorial",
       "roman": ["IIm7b5", "V7", "Im7"],
-      "defaultKey": "C",
-      "source": "Minor cousin of ii-V-I",
-      "tags": ["jazz", "minor", "essential"]
+      "defaultKey": 0,
+      "source": "PianoPig — minor cadence",
+      "summary": "Minor-key resolution. ii is half-diminished, V often altered."
+    },
+    {
+      "id": "i-vi-ii-v",
+      "name": "I–vi–ii–V (rhythm changes)",
+      "category": "tutorial",
+      "roman": ["Imaj7", "VIm7", "IIm7", "V7"],
+      "defaultKey": 0,
+      "source": "PianoPig — turnaround",
+      "summary": "Classic turnaround. The A section of Rhythm Changes is built on this."
+    },
+    {
+      "id": "i-v7-iv",
+      "name": "I–V⁷ pattern",
+      "category": "book",
+      "roman": ["Imaj7", "V7"],
+      "defaultKey": 0,
+      "source": "Weissman p.4 — basic dominant resolution",
+      "summary": "Tonic to dominant — the most fundamental harmonic motion."
+    },
+    {
+      "id": "i-iv-v7",
+      "name": "I–IV–V⁷",
+      "category": "book",
+      "roman": ["Imaj7", "IVmaj7", "V7"],
+      "defaultKey": 0,
+      "source": "Weissman p.5 — three-chord foundation",
+      "summary": "The 'three chord trick' that underpins folk, blues, and rock."
+    },
+    {
+      "id": "i-bvii-iv-biii",
+      "name": "I–♭VII–IV–♭III",
+      "category": "book",
+      "roman": ["Imaj7", "bVII", "IVmaj7", "bIII"],
+      "defaultKey": 8,
+      "source": "Weissman p.45 — keys of I and IV",
+      "summary": "Used in 'On Broadway' and 'Lemon Tree'. The ♭VII gives a folk/rock color."
+    },
+    {
+      "id": "i-vi-iv-v",
+      "name": "I–vi–IV–V (50s progression)",
+      "category": "popular",
+      "roman": ["Imaj7", "VIm7", "IVmaj7", "V7"],
+      "defaultKey": 0,
+      "source": "1950s doo-wop, classic pop",
+      "summary": "The 'Heart and Soul' / 'Stand By Me' progression. Forever pop."
+    },
+    {
+      "id": "i-v-vi-iv",
+      "name": "I–V–vi–IV (modern pop)",
+      "category": "popular",
+      "roman": ["Imaj7", "V7", "VIm7", "IVmaj7"],
+      "defaultKey": 0,
+      "source": "Modern pop ubiquity",
+      "summary": "The 'four chords' progression. Behind hundreds of pop hits."
     },
     {
       "id": "autumn-leaves",
       "name": "Autumn Leaves (A section)",
-      "roman": ["IIm7", "V7", "Imaj7", "IVmaj7", "VIIm7b5", "III7", "VIm"],
-      "defaultKey": "G",
-      "source": "PianoPig — applied jazz tune",
-      "tags": ["standard", "jazz", "tune"]
+      "category": "jazz",
+      "roman": ["IIm7", "V7", "Imaj7", "IVmaj7", "VIIm7b5", "III7", "VIm7", "VIm7"],
+      "defaultKey": 10,
+      "source": "Joseph Kosma, 1945 — standard",
+      "summary": "Major ii-V-I to relative minor ii-V-i. The most-played jazz tune."
     },
     {
-      "id": "all-the-things-A",
+      "id": "all-the-things",
       "name": "All The Things You Are (A1)",
+      "category": "jazz",
       "roman": ["VIm7", "IIm7", "V7", "Imaj7", "IVmaj7"],
-      "defaultKey": "Ab",
-      "source": "PianoPig — applied jazz tune",
-      "tags": ["standard", "jazz", "tune"]
+      "defaultKey": 8,
+      "source": "Jerome Kern, 1939 — standard",
+      "summary": "Classic Kern modulation. Each phrase moves the tonal center."
     },
     {
       "id": "blue-bossa",
-      "name": "Blue Bossa (16-bar)",
+      "name": "Blue Bossa (A section)",
+      "category": "jazz",
       "roman": ["Im7", "IVm7", "IIm7b5", "V7", "Im7"],
-      "defaultKey": "C",
-      "source": "Dyas — Monk Institute",
-      "tags": ["standard", "jazz", "tune", "minor"]
+      "defaultKey": 0,
+      "source": "Kenny Dorham, 1963 — standard",
+      "summary": "Minor blues with a brief modulation. Bossa nova feel."
     },
     {
-      "id": "rhythm-changes-A",
+      "id": "rhythm-changes-a",
       "name": "Rhythm Changes (A section)",
-      "roman": ["Imaj7", "VIm7", "IIm7", "V7"],
-      "defaultKey": "Bb",
-      "source": "Gershwin",
-      "tags": ["standard", "jazz", "turnaround"]
+      "category": "jazz",
+      "roman": ["Imaj7", "VIm7", "IIm7", "V7", "Imaj7", "VIm7", "IIm7", "V7"],
+      "defaultKey": 10,
+      "source": "Gershwin — 'I Got Rhythm' (1930)",
+      "summary": "The second most-played jazz form after the blues. AABA with bridge."
     }
   ]
 }
