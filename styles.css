@@ -689,7 +689,7 @@ button { font-family: inherit; cursor: pointer; }
 .drill-circle-slot {
   display: flex;
   justify-content: center;
-  margin: 12px 0 18px;
+  margin: 6px 0 8px;
 }
 .drill-circle-slot[hidden] { display: none; }
 

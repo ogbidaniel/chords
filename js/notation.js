@@ -6,7 +6,9 @@
 
 const Notation = (() => {
   function getVF() {
-    return (typeof Vex !== 'undefined' && Vex.Flow) ? Vex.Flow : null;
+    if (typeof Vex === 'undefined') return null;
+    // VexFlow 3.x exposes Vex.Flow; 4.x puts classes directly on Vex
+    return Vex.Flow || Vex;
   }
 
   // Pitch helpers: MIDI → VexFlow keystring + accidental
