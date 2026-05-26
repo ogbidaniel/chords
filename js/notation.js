@@ -1,14 +1,35 @@
 // notation.js — VexFlow-based sheet music rendering.
 //
-// VexFlow is loaded from CDN in index.html as a global `Vex`.
+// VexFlow is loaded from CDN in index.html as a global `Vex.Flow`.
 // We render to SVG and tag noteheads with data-midi attributes so we can
 // highlight them after the fact via classes.
 
 const Notation = (() => {
   function getVF() {
-    if (typeof Vex === 'undefined') return null;
-    // VexFlow 3.x exposes Vex.Flow; 4.x puts classes directly on Vex
-    return Vex.Flow || Vex;
+    return (typeof Vex !== 'undefined' && Vex.Flow) ? Vex.Flow : null;
+  }
+
+  // Pending renders waiting for VexFlow to finish loading.
+  // Each page that creates a Notation instance may attempt to render before
+  // the CDN script has parsed. We retry every 100ms until it's available, up
+  // to ~10 seconds, then give up and show the fallback.
+  const pendingRetries = new Set();
+  function scheduleWhenReady(fn) {
+    if (getVF()) { fn(); return; }
+    let attempts = 0;
+    const id = setInterval(() => {
+      attempts++;
+      if (getVF()) {
+        clearInterval(id);
+        pendingRetries.delete(id);
+        try { fn(); } catch (e) { console.error('Notation render failed:', e); }
+      } else if (attempts > 100) {
+        clearInterval(id);
+        pendingRetries.delete(id);
+        console.warn('VexFlow failed to load after 10s');
+      }
+    }, 100);
+    pendingRetries.add(id);
   }
 
   // Pitch helpers: MIDI → VexFlow keystring + accidental
@@ -153,13 +174,12 @@ const Notation = (() => {
         const sn = staveNotes[gi];
         if (!sn || !sn._midiKeys) return;
         const heads = g.querySelectorAll('.vf-notehead');
-        // Heads come in the order keys were given. We sorted ascending.
-        // VexFlow stacks ascending bottom-to-top in the SVG, so they should
-        // map index-for-index.
         sn._midiKeys.forEach((midi, idx) => {
           if (idx < heads.length) {
             const h = heads[idx];
+            const pc = ((midi % 12) + 12) % 12;
             h.setAttribute('data-midi', midi);
+            h.classList.add('pc-' + pc);
             if (!state.noteheadByMidi.has(midi)) state.noteheadByMidi.set(midi, []);
             state.noteheadByMidi.get(midi).push(h);
           }
@@ -173,6 +193,7 @@ const Notation = (() => {
       const VF = getVF();
       if (!VF) {
         el.innerHTML = '<div class="notation-fallback">Loading notation library…</div>';
+        scheduleWhenReady(() => renderScale(tonicPc, mode, octave));
         return null;
       }
 
@@ -221,6 +242,7 @@ const Notation = (() => {
       const VF = getVF();
       if (!VF) {
         el.innerHTML = '<div class="notation-fallback">Loading notation library…</div>';
+        scheduleWhenReady(() => renderChord(rootPc, type, octave, keySigOverride));
         return null;
       }
 
@@ -282,8 +304,13 @@ const Notation = (() => {
     function renderProgression(chords, tonicPc, octave = 4) {
       resetContainer();
       const VF = getVF();
-      if (!VF || chords.length === 0) {
+      if (!VF) {
         el.innerHTML = '<div class="notation-fallback">Loading notation library…</div>';
+        scheduleWhenReady(() => renderProgression(chords, tonicPc, octave));
+        return null;
+      }
+      if (chords.length === 0) {
+        el.innerHTML = '<div class="notation-fallback">No chords on this page.</div>';
         return null;
       }
 
@@ -372,8 +399,10 @@ const Notation = (() => {
         midis.forEach((m, j) => {
           if (j < heads.length) {
             const h = heads[j];
+            const pc = ((m % 12) + 12) % 12;
             h.setAttribute('data-midi', m);
             h.setAttribute('data-chord-index', i);
+            h.classList.add('pc-' + pc);
             if (!state.noteheadByMidi.has(m)) state.noteheadByMidi.set(m, []);
             state.noteheadByMidi.get(m).push(h);
           }
@@ -384,8 +413,10 @@ const Notation = (() => {
         const midi = chordMidis[i].bass;
         if (heads.length) {
           const h = heads[0];
+          const pc = ((midi % 12) + 12) % 12;
           h.setAttribute('data-midi', midi);
           h.setAttribute('data-chord-index', i);
+          h.classList.add('pc-' + pc);
           if (!state.noteheadByMidi.has(midi)) state.noteheadByMidi.set(midi, []);
           state.noteheadByMidi.get(midi).push(h);
         }

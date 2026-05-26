@@ -31,15 +31,25 @@ const PageScalesHub = (() => {
       </div>
     `;
 
-    // Render mini snippets after DOM is in place
-    requestAnimationFrame(() => {
+    // Render mini snippets after DOM is in place. If VexFlow hasn't loaded
+    // yet, wait for it.
+    function paintSnippets() {
+      if (typeof Vex === 'undefined' || !Vex.Flow) return false;
       [...majorOrder.map(pc => ({ pc, mode: 'major' })),
        ...minorOrder.map(pc => ({ pc, mode: 'natural-minor' }))].forEach(({ pc, mode }) => {
         const containerId = `scale-snippet-${mode}-${pc}`;
         const el = document.getElementById(containerId);
         if (el) renderSnippet(el, pc, mode);
       });
-    });
+      return true;
+    }
+    let attempts = 0;
+    function tryPaint() {
+      if (paintSnippets()) return;
+      if (attempts++ > 100) return;
+      setTimeout(tryPaint, 100);
+    }
+    requestAnimationFrame(tryPaint);
   }
 
   function scaleTile(pc, mode) {

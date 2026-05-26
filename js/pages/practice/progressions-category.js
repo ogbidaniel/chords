@@ -41,12 +41,21 @@ const PageProgressionsCategory = (() => {
       </div>
     `;
 
-    requestAnimationFrame(() => {
+    function paintAll() {
+      if (typeof Vex === 'undefined' || !Vex.Flow) return false;
       items.forEach(p => {
         const slot = mainEl.querySelector(`.prog-tile-snippet[data-id="${p.id}"]`);
         if (slot) renderSnippet(slot, p);
       });
-    });
+      return true;
+    }
+    let attempts = 0;
+    function tryPaint() {
+      if (paintAll()) return;
+      if (attempts++ > 100) return;
+      setTimeout(tryPaint, 100);
+    }
+    requestAnimationFrame(tryPaint);
   }
 
   function prettyRoman(r) {

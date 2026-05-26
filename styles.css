@@ -25,9 +25,22 @@
   --paper-ink:      #1a1612;
 
   /* States */
-  --hl-playing:     #6db3ff;     /* blue — currently playing */
   --hl-match:       #f0b961;     /* amber — match expected */
   --hl-match-glow:  rgba(240, 185, 97, 0.45);
+
+  /* Pitch-class palette (color wheel) — used to tint played keys */
+  --pc-0:  #e53935;  /* C       — red */
+  --pc-1:  #c2185b;  /* Db/C#   — magenta */
+  --pc-2:  #ef6c00;  /* D       — deep orange */
+  --pc-3:  #4527a0;  /* Eb      — indigo */
+  --pc-4:  #fdd835;  /* E       — yellow */
+  --pc-5:  #ec407a;  /* F       — pink */
+  --pc-6:  #2e7d32;  /* F#/Gb   — green */
+  --pc-7:  #f57c00;  /* G       — orange */
+  --pc-8:  #1565c0;  /* Ab      — blue */
+  --pc-9:  #f9a825;  /* A       — gold/yellow-orange */
+  --pc-10: #6a1b9a;  /* Bb      — purple */
+  --pc-11: #66bb6a;  /* B       — light green */
 
   /* Quality-mapped (drives drift color) */
   --quality-h:      45;          /* default warm */
@@ -74,7 +87,8 @@ a { color: inherit; text-decoration: none; }
 button { font-family: inherit; cursor: pointer; }
 
 /* ────────────────────────────────────────────────────────────
-   Atmosphere — drift layers, velocity-driven
+   Atmosphere — wandering drift blobs at random positions.
+   Not anchored to corners or to the keyboard area.
    ──────────────────────────────────────────────────────────── */
 .atmosphere {
   position: fixed; inset: 0;
@@ -84,34 +98,56 @@ button { font-family: inherit; cursor: pointer; }
 }
 .drift {
   position: absolute;
-  width: 1400px; height: 1400px;
   border-radius: 50%;
-  filter: blur(120px);
-  opacity: calc(0.25 + var(--energy) * 0.7);
-  transition: opacity 380ms ease, background 1800ms ease;
+  filter: blur(110px);
+  /* Much more subtle: base 0.10, energy adds up to 0.35 */
+  opacity: calc(0.10 + var(--energy) * 0.35);
+  transition: opacity 600ms ease, background 2400ms ease;
   mix-blend-mode: screen;
 }
 .drift-a {
-  top: -300px; left: -300px;
+  width: 720px; height: 720px;
+  top: 18%; left: 32%;
   background: radial-gradient(circle at center,
-    hsla(var(--quality-h), var(--quality-s), var(--quality-l), 0.55) 0%,
+    hsla(var(--quality-h), var(--quality-s), var(--quality-l), 0.40) 0%,
     transparent 65%);
-  animation: drift-a-anim 24s ease-in-out infinite alternate;
+  animation: drift-a-wander 38s ease-in-out infinite alternate;
 }
 .drift-b {
-  bottom: -400px; right: -350px;
+  width: 560px; height: 560px;
+  top: 56%; left: 12%;
   background: radial-gradient(circle at center,
-    hsla(calc(var(--quality-h) + 25), var(--quality-s), calc(var(--quality-l) + 4%), 0.45) 0%,
+    hsla(calc(var(--quality-h) + 30), var(--quality-s), calc(var(--quality-l) + 4%), 0.35) 0%,
     transparent 65%);
-  animation: drift-b-anim 30s ease-in-out infinite alternate;
+  animation: drift-b-wander 47s ease-in-out infinite alternate;
 }
-@keyframes drift-a-anim {
-  0%   { transform: translate(0,0) scale(1); }
-  100% { transform: translate(140px, 80px) scale(1.15); }
+.drift-c {
+  width: 480px; height: 480px;
+  top: 22%; left: 64%;
+  background: radial-gradient(circle at center,
+    hsla(calc(var(--quality-h) - 18), var(--quality-s), calc(var(--quality-l) - 2%), 0.30) 0%,
+    transparent 65%);
+  animation: drift-c-wander 53s ease-in-out infinite alternate;
 }
-@keyframes drift-b-anim {
-  0%   { transform: translate(0,0) scale(1); }
-  100% { transform: translate(-100px, -60px) scale(1.08); }
+/* Wander paths picked to look unrelated to any UI region.
+   Each blob crosses the canvas in a slow, irregular arc. */
+@keyframes drift-a-wander {
+  0%   { transform: translate(0, 0)        scale(1); }
+  33%  { transform: translate(-160px, 90px) scale(1.05); }
+  66%  { transform: translate(80px, 180px) scale(0.95); }
+  100% { transform: translate(220px, -40px) scale(1.10); }
+}
+@keyframes drift-b-wander {
+  0%   { transform: translate(0, 0)        scale(1); }
+  40%  { transform: translate(200px, -120px) scale(0.92); }
+  75%  { transform: translate(-90px, 60px) scale(1.08); }
+  100% { transform: translate(120px, 140px) scale(1.0); }
+}
+@keyframes drift-c-wander {
+  0%   { transform: translate(0, 0)        scale(1); }
+  30%  { transform: translate(-140px, -90px) scale(1.04); }
+  70%  { transform: translate(60px, 130px) scale(0.97); }
+  100% { transform: translate(-180px, 40px) scale(1.06); }
 }
 
 /* ────────────────────────────────────────────────────────────
@@ -207,7 +243,7 @@ button { font-family: inherit; cursor: pointer; }
 .main-pane {
   margin-left: var(--sidebar-w);
   min-height: 100vh;
-  padding: 36px 44px 80px;
+  padding: 24px 44px 60px;
   position: relative;
   z-index: 2;
 }
@@ -252,13 +288,13 @@ button { font-family: inherit; cursor: pointer; }
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 18px;
   align-items: center;
 }
 .play-welcome {
   text-align: center;
   max-width: 580px;
-  padding: 32px 24px;
+  padding: 18px 24px;
 }
 .welcome-eyebrow { color: var(--ink-dim); margin: 0 0 12px 0; }
 .welcome-text {
@@ -279,7 +315,7 @@ button { font-family: inherit; cursor: pointer; }
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  min-height: 80px;
+  min-height: 60px;
   justify-content: center;
 }
 .chord-name {
@@ -289,8 +325,8 @@ button { font-family: inherit; cursor: pointer; }
   font-weight: 500;
   letter-spacing: -0.02em;
   line-height: 1;
-  text-shadow: 0 0 30px hsla(var(--quality-h), var(--quality-s), var(--quality-l), calc(var(--energy) * 0.6));
-  transition: text-shadow 380ms ease;
+  text-shadow: 0 0 20px hsla(var(--quality-h), var(--quality-s), var(--quality-l), calc(var(--energy) * 0.3));
+  transition: text-shadow 600ms ease;
 }
 .chord-detail {
   color: var(--ink-dim);
@@ -301,19 +337,22 @@ button { font-family: inherit; cursor: pointer; }
   max-width: 760px;
   background: var(--paper);
   border-radius: var(--radius-lg);
-  padding: 18px 10px 6px;
+  padding: 14px 10px 4px;
   box-shadow: 0 4px 24px rgba(0,0,0,0.4), inset 0 0 0 1px var(--paper-edge);
-  min-height: 200px;
+  min-height: 180px;
 }
 .play-keyboard {
   width: 100%;
   max-width: 1000px;
-  padding: 14px 0 0 0;
+  padding: 4px 0 0 0;
+}
+.play-keyboard .piano-svg {
+  max-height: 200px;
 }
 .play-footer {
   color: var(--ink-faint);
   text-align: center;
-  margin-top: 12px;
+  margin-top: 8px;
 }
 
 /* ────────────────────────────────────────────────────────────
@@ -359,13 +398,23 @@ button { font-family: inherit; cursor: pointer; }
   text-shadow: 0 0 6px var(--hl-match-glow);
 }
 
-/* Notehead highlighting */
+/* Notehead highlighting — colored by pitch class when playing,
+   amber when matching the drill prompt */
 .vf-notehead {
   transition: fill 120ms ease, filter 200ms ease;
 }
-.vf-notehead.vf-playing {
-  fill: var(--hl-playing) !important;
-}
+.vf-notehead.vf-playing.pc-0  { fill: var(--pc-0)  !important; }
+.vf-notehead.vf-playing.pc-1  { fill: var(--pc-1)  !important; }
+.vf-notehead.vf-playing.pc-2  { fill: var(--pc-2)  !important; }
+.vf-notehead.vf-playing.pc-3  { fill: var(--pc-3)  !important; }
+.vf-notehead.vf-playing.pc-4  { fill: var(--pc-4)  !important; }
+.vf-notehead.vf-playing.pc-5  { fill: var(--pc-5)  !important; }
+.vf-notehead.vf-playing.pc-6  { fill: var(--pc-6)  !important; }
+.vf-notehead.vf-playing.pc-7  { fill: var(--pc-7)  !important; }
+.vf-notehead.vf-playing.pc-8  { fill: var(--pc-8)  !important; }
+.vf-notehead.vf-playing.pc-9  { fill: var(--pc-9)  !important; }
+.vf-notehead.vf-playing.pc-10 { fill: var(--pc-10) !important; }
+.vf-notehead.vf-playing.pc-11 { fill: var(--pc-11) !important; }
 .vf-notehead.vf-match {
   fill: #d18a1f !important;
   filter: drop-shadow(0 0 4px var(--hl-match-glow));
@@ -385,8 +434,14 @@ button { font-family: inherit; cursor: pointer; }
   stroke-width: 1.2;
   transition: fill 90ms ease, filter 200ms ease;
 }
-.kb-white.playing { fill: var(--hl-playing); }
-.kb-white.match   { fill: #f0b961; filter: drop-shadow(0 0 8px var(--hl-match-glow)); }
+.kb-white.playing.pc-0  { fill: var(--pc-0); }
+.kb-white.playing.pc-2  { fill: var(--pc-2); }
+.kb-white.playing.pc-4  { fill: var(--pc-4); }
+.kb-white.playing.pc-5  { fill: var(--pc-5); }
+.kb-white.playing.pc-7  { fill: var(--pc-7); }
+.kb-white.playing.pc-9  { fill: var(--pc-9); }
+.kb-white.playing.pc-11 { fill: var(--pc-11); }
+.kb-white.match   { fill: var(--hl-match); filter: drop-shadow(0 0 8px var(--hl-match-glow)); }
 
 .kb-black {
   fill: #1a1812;
@@ -394,8 +449,12 @@ button { font-family: inherit; cursor: pointer; }
   stroke-width: 1.2;
   transition: fill 90ms ease, filter 200ms ease;
 }
-.kb-black.playing { fill: var(--hl-playing); }
-.kb-black.match   { fill: #c8951a; filter: drop-shadow(0 0 6px var(--hl-match-glow)); }
+.kb-black.playing.pc-1  { fill: var(--pc-1); }
+.kb-black.playing.pc-3  { fill: var(--pc-3); }
+.kb-black.playing.pc-6  { fill: var(--pc-6); }
+.kb-black.playing.pc-8  { fill: var(--pc-8); }
+.kb-black.playing.pc-10 { fill: var(--pc-10); }
+.kb-black.match   { fill: var(--hl-match); filter: drop-shadow(0 0 6px var(--hl-match-glow)); }
 
 .kb-label {
   font-family: var(--font-mono);
@@ -575,20 +634,20 @@ button { font-family: inherit; cursor: pointer; }
   display: flex;
   gap: 16px;
   align-items: flex-start;
-  margin-bottom: 18px;
-  padding-bottom: 14px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
   border-bottom: 1px solid var(--border-subtle);
 }
 .drill-back {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px; height: 36px;
+  width: 32px; height: 32px;
   background: var(--bg-elev-1);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius);
   color: var(--ink-mid);
-  font-size: 18px;
+  font-size: 16px;
   transition: all 180ms ease;
   flex-shrink: 0;
 }
@@ -598,9 +657,9 @@ button { font-family: inherit; cursor: pointer; }
   min-width: 0;
 }
 .drill-title {
-  font-size: 28px;
+  font-size: 22px;
   font-style: italic;
-  margin: 4px 0 0 0;
+  margin: 2px 0 0 0;
   color: var(--ink-bright);
 }
 .drill-toolbar {
@@ -689,9 +748,14 @@ button { font-family: inherit; cursor: pointer; }
 .drill-circle-slot {
   display: flex;
   justify-content: center;
-  margin: 6px 0 8px;
+  margin: 6px 0 10px;
+  max-height: 160px;
 }
 .drill-circle-slot[hidden] { display: none; }
+.drill-circle-slot .cof-svg {
+  width: 140px;
+  height: 140px;
+}
 
 @media (max-width: 720px) {
   .drill-circle-slot { display: none !important; }
@@ -701,15 +765,20 @@ button { font-family: inherit; cursor: pointer; }
 .drill-staff-slot {
   background: var(--paper);
   border-radius: var(--radius-lg);
-  padding: 18px 10px 6px;
+  padding: 14px 10px 4px;
   box-shadow: 0 4px 24px rgba(0,0,0,0.4), inset 0 0 0 1px var(--paper-edge);
-  min-height: 220px;
-  margin-bottom: 24px;
+  min-height: 180px;
+  margin-bottom: 16px;
   overflow: hidden;
 }
 
 .drill-keyboard-slot {
   width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+.drill-keyboard-slot .piano-svg {
+  max-height: 180px;
 }
 
 /* Cycle controls / key bar */
@@ -784,14 +853,14 @@ button { font-family: inherit; cursor: pointer; }
 }
 .cof-major {
   font-family: var(--font-display);
-  font-size: 16px;
+  font-size: 11px;
   font-weight: 500;
   fill: var(--ink-mid);
   transition: fill 200ms ease;
 }
 .cof-minor {
   font-family: var(--font-display);
-  font-size: 13px;
+  font-size: 9px;
   font-style: italic;
   fill: var(--ink-dim);
   transition: fill 200ms ease;

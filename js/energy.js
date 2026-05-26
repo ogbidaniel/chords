@@ -6,30 +6,29 @@ const Energy = (() => {
   let energy = 0;        // 0..1
   let lastTickAt = 0;
   let rafId = null;
-  const HALF_LIFE = 1800; // ms — energy halves every 1.8s of silence
-  const VELOCITY_GAIN = 0.012; // a velocity-127 hit pushes energy up by ~1.5
+  const HALF_LIFE = 900;   // ms — faster decay so silence settles quickly
+  const VELOCITY_GAIN = 0.0035; // gentle — a forte note adds ~0.45, not a wallop
+  const ENERGY_MAX = 0.85;  // ceiling — never fully saturate
 
   function pump(velocity) {
-    // Velocity 0..127 → bump
-    energy = Math.min(1.5, energy + velocity * VELOCITY_GAIN);
+    energy = Math.min(ENERGY_MAX, energy + velocity * VELOCITY_GAIN);
   }
 
   function step(now) {
     const dt = lastTickAt ? now - lastTickAt : 16;
     lastTickAt = now;
 
-    // Held notes also keep energy from decaying fully — sustain via max-of-held-velocities
+    // Held notes set a soft floor so drift doesn't fully die while playing,
+    // but the floor is much lower than the velocity-pump peak.
     const sounding = MIDI.getSounding();
     if (sounding.size > 0) {
-      // Compute average velocity of currently held notes as a floor
       let total = 0;
       for (const v of sounding.values()) total += v;
       const avg = total / sounding.size;
-      const floor = (avg / 127) * 0.7;
+      const floor = (avg / 127) * 0.30;  // was 0.70 — much lower
       if (energy < floor) energy = floor;
     }
 
-    // Exponential decay
     const decay = Math.pow(0.5, dt / HALF_LIFE);
     energy *= decay;
     if (energy < 0.005) energy = 0;

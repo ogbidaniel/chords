@@ -99,7 +99,7 @@ const DrillShell = (() => {
       toggleCircle,
       ensureCircle(onSelect = null) {
         if (!circleInstance) {
-          circleInstance = CircleOfFifths.create({ container: circleSlot, onSelect, size: 160 });
+          circleInstance = CircleOfFifths.create({ container: circleSlot, onSelect });
         }
         return circleInstance;
       },

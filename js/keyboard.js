@@ -35,8 +35,9 @@ const Keyboard = (() => {
 
     // Whites
     whites.forEach((m, i) => {
+      const pc = ((m % 12) + 12) % 12;
       const rect = document.createElementNS(ns, 'rect');
-      rect.setAttribute('class', 'kb-white');
+      rect.setAttribute('class', `kb-white pc-${pc}`);
       rect.setAttribute('x', i * W);
       rect.setAttribute('y', 0);
       rect.setAttribute('width', W);
@@ -61,12 +62,13 @@ const Keyboard = (() => {
 
     // Blacks
     blacks.forEach(m => {
+      const pc = ((m % 12) + 12) % 12;
       const whiteBelow = m - 1;
       const idx = whites.indexOf(whiteBelow);
       if (idx < 0) return;
       const x = (idx + 1) * W - blackW / 2;
       const rect = document.createElementNS(ns, 'rect');
-      rect.setAttribute('class', 'kb-black');
+      rect.setAttribute('class', `kb-black pc-${pc}`);
       rect.setAttribute('x', x);
       rect.setAttribute('y', 0);
       rect.setAttribute('width', blackW);

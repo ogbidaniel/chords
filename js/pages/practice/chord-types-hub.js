@@ -18,12 +18,21 @@ const PageChordTypesHub = (() => {
       </div>
     `;
 
-    requestAnimationFrame(() => {
+    function paintAll() {
+      if (typeof Vex === 'undefined' || !Vex.Flow) return false;
       ['maj7','7','m7'].forEach(t => {
         const el = document.getElementById(`chord-snippet-${t}`);
         if (el) renderSnippet(el, t);
       });
-    });
+      return true;
+    }
+    let attempts = 0;
+    function tryPaint() {
+      if (paintAll()) return;
+      if (attempts++ > 100) return;
+      setTimeout(tryPaint, 100);
+    }
+    requestAnimationFrame(tryPaint);
   }
 
   function chordTypeTile(type, name, formula) {

@@ -30,6 +30,7 @@
         <div class="atmosphere" aria-hidden="true">
           <div class="drift drift-a"></div>
           <div class="drift drift-b"></div>
+          <div class="drift drift-c"></div>
         </div>
       </div>
     `;

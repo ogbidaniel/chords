@@ -31,7 +31,7 @@ const CircleOfFifths = (() => {
     return map[majorPc] || '?';
   }
 
-  function create({ container, onSelect = null, size = 220 }) {
+  function create({ container, onSelect = null, size = 140 }) {
     const el = typeof container === 'string' ? document.querySelector(container) : container;
     if (!el) return null;
     el.innerHTML = '';
