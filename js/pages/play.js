@@ -148,10 +148,6 @@ const PagePlay = (() => {
       onRelease: m => MIDI.virtualNoteOff(m),
     });
 
-    // xMinYMid slice: anchor to left (C2 visible), fill height, crop right
-    const pianoSvg = mainEl.querySelector('#play-piano .piano-svg');
-    if (pianoSvg) pianoSvg.setAttribute('preserveAspectRatio', 'xMinYMid slice');
-
     // ── Notation staff ───────────────────────────────────────────────────
     notation = Notation.create({ container: '#play-staff' });
 

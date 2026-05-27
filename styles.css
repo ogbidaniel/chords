@@ -397,7 +397,9 @@ body.sidebar-collapsed .sidebar-expand-tab { display: flex; align-items: center;
 
 /* ── Large piano — fills bottom portion, left-aligned ───────── */
 .play-keyboard-large {
-  flex: 0 0 44vh;
+  flex: 0 0 auto;
+  aspect-ratio: 2900 / 480;
+  max-height: 44vh;
   overflow: hidden;
   position: relative;
 }
@@ -410,6 +412,12 @@ body.sidebar-collapsed .sidebar-expand-tab { display: flex; align-items: center;
   height: 100%;
   max-height: none;
   display: block;
+}
+
+@media (max-width: 860px) {
+  .play-room {
+    margin: -24px -18px -80px;
+  }
 }
 
 /* Keep the smaller keyboard style for drill pages */
