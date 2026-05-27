@@ -87,68 +87,9 @@ a { color: inherit; text-decoration: none; }
 button { font-family: inherit; cursor: pointer; }
 
 /* ────────────────────────────────────────────────────────────
-   Atmosphere — wandering drift blobs at random positions.
-   Not anchored to corners or to the keyboard area.
+   Atmosphere — canvas injected by js/atmosphere.js.
+   CSS drift blobs removed; canvas handles all background colour.
    ──────────────────────────────────────────────────────────── */
-.atmosphere {
-  position: fixed; inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  overflow: hidden;
-}
-.drift {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(110px);
-  /* Much more subtle: base 0.10, energy adds up to 0.35 */
-  opacity: calc(0.10 + var(--energy) * 0.35);
-  transition: opacity 600ms ease, background 2400ms ease;
-  mix-blend-mode: screen;
-}
-.drift-a {
-  width: 720px; height: 720px;
-  top: 18%; left: 32%;
-  background: radial-gradient(circle at center,
-    hsla(var(--quality-h), var(--quality-s), var(--quality-l), 0.40) 0%,
-    transparent 65%);
-  animation: drift-a-wander 38s ease-in-out infinite alternate;
-}
-.drift-b {
-  width: 560px; height: 560px;
-  top: 56%; left: 12%;
-  background: radial-gradient(circle at center,
-    hsla(calc(var(--quality-h) + 30), var(--quality-s), calc(var(--quality-l) + 4%), 0.35) 0%,
-    transparent 65%);
-  animation: drift-b-wander 47s ease-in-out infinite alternate;
-}
-.drift-c {
-  width: 480px; height: 480px;
-  top: 22%; left: 64%;
-  background: radial-gradient(circle at center,
-    hsla(calc(var(--quality-h) - 18), var(--quality-s), calc(var(--quality-l) - 2%), 0.30) 0%,
-    transparent 65%);
-  animation: drift-c-wander 53s ease-in-out infinite alternate;
-}
-/* Wander paths picked to look unrelated to any UI region.
-   Each blob crosses the canvas in a slow, irregular arc. */
-@keyframes drift-a-wander {
-  0%   { transform: translate(0, 0)        scale(1); }
-  33%  { transform: translate(-160px, 90px) scale(1.05); }
-  66%  { transform: translate(80px, 180px) scale(0.95); }
-  100% { transform: translate(220px, -40px) scale(1.10); }
-}
-@keyframes drift-b-wander {
-  0%   { transform: translate(0, 0)        scale(1); }
-  40%  { transform: translate(200px, -120px) scale(0.92); }
-  75%  { transform: translate(-90px, 60px) scale(1.08); }
-  100% { transform: translate(120px, 140px) scale(1.0); }
-}
-@keyframes drift-c-wander {
-  0%   { transform: translate(0, 0)        scale(1); }
-  30%  { transform: translate(-140px, -90px) scale(1.04); }
-  70%  { transform: translate(60px, 130px) scale(0.97); }
-  100% { transform: translate(-180px, 40px) scale(1.06); }
-}
 
 /* ────────────────────────────────────────────────────────────
    Layout — sidebar + main pane

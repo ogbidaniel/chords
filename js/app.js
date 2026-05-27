@@ -27,11 +27,7 @@
 
         <main id="main-pane" class="main-pane"></main>
 
-        <div class="atmosphere" aria-hidden="true">
-          <div class="drift drift-a"></div>
-          <div class="drift drift-b"></div>
-          <div class="drift drift-c"></div>
-        </div>
+        <!-- atmosphere canvas injected by Atmosphere.start() -->
       </div>
     `;
 
@@ -78,6 +74,7 @@
     registerRoutes();
     MIDI.init();
     Energy.start();
+    Atmosphere.start();
     Router.start();
   });
 })();
