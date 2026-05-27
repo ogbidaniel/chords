@@ -18,8 +18,12 @@
           </nav>
           <div class="sidebar-foot mono">
             <span class="midi-status idle" id="midi-status">connecting…</span>
+            <button class="sidebar-collapse-btn" id="sidebar-collapse-btn" title="Collapse sidebar">‹ hide</button>
           </div>
         </aside>
+
+        <!-- Expand tab — only visible when sidebar is collapsed on desktop -->
+        <button class="sidebar-expand-tab" id="sidebar-expand-tab" title="Open menu" aria-label="Open menu">›</button>
 
         <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle menu">
           <span></span><span></span><span></span>
@@ -31,9 +35,18 @@
       </div>
     `;
 
+    // Mobile hamburger — open sidebar overlay
     document.getElementById('sidebar-toggle').addEventListener('click', () => {
       document.getElementById('sidebar').classList.toggle('open');
     });
+    // Desktop collapse / expand
+    function toggleSidebarCollapse() {
+      document.body.classList.toggle('sidebar-collapsed');
+    }
+    document.getElementById('sidebar-collapse-btn').addEventListener('click', toggleSidebarCollapse);
+    document.getElementById('sidebar-expand-tab').addEventListener('click', toggleSidebarCollapse);
+    // Expose globally so the play toolbar can also toggle
+    window.toggleSidebarCollapse = toggleSidebarCollapse;
 
     MIDI.on('status', (text, kind) => {
       const el = document.getElementById('midi-status');

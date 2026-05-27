@@ -432,13 +432,16 @@ const Notation = (() => {
       resetContainer();
       const VF = getVF();
       if (!VF) {
-        el.innerHTML = '<div class="notation-fallback">Loading notation…</div>';
+        el.innerHTML = '<div class="notation-fallback" style="color:rgba(255,255,255,0.5);padding:40px;text-align:center;">Loading notation…</div>';
         scheduleWhenReady(() => renderLiveNotes(midiArray));
         return;
       }
 
-      const width  = Math.max(400, el.clientWidth || 800);
-      const height = 210;
+      // getBoundingClientRect is more reliable than clientWidth for flex children
+      const rect  = el.getBoundingClientRect();
+      const width = Math.max(500, rect.width || el.offsetWidth || window.innerWidth - 280);
+      // 250px: enough for treble + bass staves plus ledger-line breathing room
+      const height = 250;
       const renderer = new VF.Renderer(el, VF.Renderer.Backends.SVG);
       renderer.resize(width, height);
       const ctx = renderer.getContext();
@@ -447,11 +450,12 @@ const Notation = (() => {
       const stavePad = 8;
       const staveW   = width - stavePad * 2;
 
-      const trebleStave = new VF.Stave(stavePad, 14, staveW);
+      const trebleStave = new VF.Stave(stavePad, 18, staveW);
       trebleStave.addClef('treble');
       trebleStave.setContext(ctx).draw();
 
-      const bassStave = new VF.Stave(stavePad, 118, staveW);
+      // Bass stave positioned lower to give bass ledger lines room
+      const bassStave = new VF.Stave(stavePad, 130, staveW);
       bassStave.addClef('bass');
       bassStave.setContext(ctx).draw();
 
