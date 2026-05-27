@@ -425,6 +425,81 @@ const Notation = (() => {
       return { chordMidis, keySig };
     }
 
+    // Render arbitrary live notes on a grand staff (used by the Play page).
+    // Splits at middle C: notes below 60 → bass, 60+ → treble.
+    // Shows whole rests in whichever clef has no notes.
+    function renderLiveNotes(midiArray) {
+      resetContainer();
+      const VF = getVF();
+      if (!VF) {
+        el.innerHTML = '<div class="notation-fallback">Loading notation…</div>';
+        scheduleWhenReady(() => renderLiveNotes(midiArray));
+        return;
+      }
+
+      const width  = Math.max(400, el.clientWidth || 800);
+      const height = 210;
+      const renderer = new VF.Renderer(el, VF.Renderer.Backends.SVG);
+      renderer.resize(width, height);
+      const ctx = renderer.getContext();
+      ctx.setFont('Times', 14);
+
+      const stavePad = 8;
+      const staveW   = width - stavePad * 2;
+
+      const trebleStave = new VF.Stave(stavePad, 14, staveW);
+      trebleStave.addClef('treble');
+      trebleStave.setContext(ctx).draw();
+
+      const bassStave = new VF.Stave(stavePad, 118, staveW);
+      bassStave.addClef('bass');
+      bassStave.setContext(ctx).draw();
+
+      try {
+        new VF.StaveConnector(trebleStave, bassStave)
+          .setType(VF.StaveConnector.type.BRACE).setContext(ctx).draw();
+        new VF.StaveConnector(trebleStave, bassStave)
+          .setType(VF.StaveConnector.type.SINGLE_LEFT).setContext(ctx).draw();
+      } catch (_) { /* defensive */ }
+
+      const sorted      = [...midiArray].sort((a, b) => a - b);
+      const trebleMidis = sorted.filter(m => m >= 60);
+      const bassMidis   = sorted.filter(m => m < 60);
+
+      // Whole note chord or whole rest
+      const trebleTick = trebleMidis.length > 0
+        ? makeStaveNote(VF, trebleMidis, 'w', 'treble', null)
+        : new VF.StaveNote({ clef: 'treble', keys: ['b/4'], duration: 'wr' });
+
+      const bassTick = bassMidis.length > 0
+        ? makeStaveNote(VF, bassMidis, 'w', 'bass', null)
+        : new VF.StaveNote({ clef: 'bass', keys: ['d/3'], duration: 'wr' });
+
+      const trebleVoice = new VF.Voice({ num_beats: 4, beat_value: 4 }).setStrict(false);
+      trebleVoice.addTickables([trebleTick]);
+      const bassVoice = new VF.Voice({ num_beats: 4, beat_value: 4 }).setStrict(false);
+      bassVoice.addTickables([bassTick]);
+
+      try {
+        new VF.Formatter()
+          .joinVoices([trebleVoice, bassVoice])
+          .format([trebleVoice, bassVoice], staveW - 70);
+        trebleVoice.draw(ctx, trebleStave);
+        bassVoice.draw(ctx, bassStave);
+      } catch (e) {
+        console.warn('renderLiveNotes:', e);
+      }
+
+      // Tag noteheads for future highlighting if needed
+      const svgRoot = el.querySelector('svg');
+      if (svgRoot) {
+        const allNotes = [];
+        if (trebleMidis.length > 0) allNotes.push(trebleTick);
+        if (bassMidis.length > 0)   allNotes.push(bassTick);
+        if (allNotes.length > 0) tagAfterRender(svgRoot, allNotes, sorted);
+      }
+    }
+
     // Highlighting API
     // setNotePlay(midi, on) — neutral "currently playing" color (blue)
     function setNotePlay(midi, on) {
@@ -461,6 +536,7 @@ const Notation = (() => {
       renderScale,
       renderChord,
       renderProgression,
+      renderLiveNotes,
       setNotePlay,
       setNoteMatch,
       setChordLabelMatch,

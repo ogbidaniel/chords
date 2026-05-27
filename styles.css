@@ -222,66 +222,56 @@ button { font-family: inherit; cursor: pointer; }
 }
 
 /* ────────────────────────────────────────────────────────────
-   PLAY home
+   PLAY home — full-bleed layout, large piano, always-on staff
    ──────────────────────────────────────────────────────────── */
 .play-room {
-  max-width: 1100px;
-  margin: 0 auto;
+  /* Bleed to main-pane edges (cancels the 44px side / 24px top padding) */
+  margin: -24px -44px -60px;
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  align-items: center;
+  height: 100vh;
+  overflow: hidden;
+  gap: 0;
 }
-.play-welcome {
-  text-align: center;
-  max-width: 580px;
-  padding: 18px 24px;
-}
-.welcome-eyebrow { color: var(--ink-dim); margin: 0 0 12px 0; }
-.welcome-text {
-  font-family: var(--font-display);
-  font-size: 22px;
-  color: var(--ink-bright);
-  font-style: italic;
-  margin: 0 0 8px 0;
-  line-height: 1.45;
-}
-.welcome-text-dim {
-  color: var(--ink-mid);
-  font-size: 14px;
-  margin: 0;
-}
-.chord-display-row {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  min-height: 60px;
-  justify-content: center;
-}
-.chord-name {
-  font-size: 56px;
-  color: var(--ink-bright);
-  font-style: italic;
-  font-weight: 500;
-  letter-spacing: -0.02em;
-  line-height: 1;
-  text-shadow: 0 0 20px hsla(var(--quality-h), var(--quality-s), var(--quality-l), calc(var(--energy) * 0.3));
-  transition: text-shadow 600ms ease;
-}
-.chord-detail {
-  color: var(--ink-dim);
-  font-size: 10px;
-}
+
+/* Grand staff — full-width paper strip */
 .play-staff {
+  flex: 1;
+  min-height: 0;
   width: 100%;
-  max-width: 760px;
   background: var(--paper);
-  border-radius: var(--radius-lg);
-  padding: 14px 10px 4px;
   box-shadow: 0 4px 24px rgba(0,0,0,0.4), inset 0 0 0 1px var(--paper-edge);
-  min-height: 180px;
+  padding: 12px 32px 4px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
 }
+.play-staff svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Large piano — fills the bottom ~45% of the viewport.
+   preserveAspectRatio is set to "xMidYMid slice" by play.js so the
+   piano scales to fill the height and the sides crop gracefully. */
+.play-keyboard-large {
+  flex: 0 0 44vh;
+  overflow: hidden;
+  position: relative;
+}
+.play-keyboard-large #play-piano {
+  width: 100%;
+  height: 100%;
+}
+.play-keyboard-large .piano-svg {
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  display: block;
+}
+
+/* Keep the smaller keyboard style for drill pages */
 .play-keyboard {
   width: 100%;
   max-width: 1000px;
@@ -289,11 +279,6 @@ button { font-family: inherit; cursor: pointer; }
 }
 .play-keyboard .piano-svg {
   max-height: 200px;
-}
-.play-footer {
-  color: var(--ink-faint);
-  text-align: center;
-  margin-top: 8px;
 }
 
 /* ────────────────────────────────────────────────────────────
@@ -375,13 +360,9 @@ button { font-family: inherit; cursor: pointer; }
   stroke-width: 1.2;
   transition: fill 90ms ease, filter 200ms ease;
 }
-.kb-white.playing.pc-0  { fill: var(--pc-0); }
-.kb-white.playing.pc-2  { fill: var(--pc-2); }
-.kb-white.playing.pc-4  { fill: var(--pc-4); }
-.kb-white.playing.pc-5  { fill: var(--pc-5); }
-.kb-white.playing.pc-7  { fill: var(--pc-7); }
-.kb-white.playing.pc-9  { fill: var(--pc-9); }
-.kb-white.playing.pc-11 { fill: var(--pc-11); }
+/* Uniform soft blue for any playing key — colour stays consistent
+   so the background gradient does all the pitch-class colour work */
+.kb-white.playing { fill: #8ec5f5; filter: drop-shadow(0 0 8px rgba(100,180,250,0.55)); }
 .kb-white.match   { fill: var(--hl-match); filter: drop-shadow(0 0 8px var(--hl-match-glow)); }
 
 .kb-black {
@@ -390,11 +371,7 @@ button { font-family: inherit; cursor: pointer; }
   stroke-width: 1.2;
   transition: fill 90ms ease, filter 200ms ease;
 }
-.kb-black.playing.pc-1  { fill: var(--pc-1); }
-.kb-black.playing.pc-3  { fill: var(--pc-3); }
-.kb-black.playing.pc-6  { fill: var(--pc-6); }
-.kb-black.playing.pc-8  { fill: var(--pc-8); }
-.kb-black.playing.pc-10 { fill: var(--pc-10); }
+.kb-black.playing { fill: #4a96e8; filter: drop-shadow(0 0 6px rgba(74,150,232,0.65)); }
 .kb-black.match   { fill: var(--hl-match); filter: drop-shadow(0 0 6px var(--hl-match-glow)); }
 
 .kb-label {
